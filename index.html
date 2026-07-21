@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Runway — Kelly</title>
 <meta name="apple-mobile-web-app-title" content="Runway">
-<meta name="theme-color" content="#10141F">
+<meta name="theme-color" content="#FBF4F7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#10141F; --panel:#1A2030; --panel2:#161B29; --line:#2A3247;
-  --text:#E9ECF4; --dim:#8A93A8; --faint:#5A6378;
-  --gold:#F2B84B; --gold-dim:#8a6a2d;
-  --mint:#57D9A3; --coral:#FF7A6B; --sky:#7FB4FF;
-  --r:14px;
+  --ink:#FBF4F7; --panel:#FFFFFF; --panel2:#F9F0F4; --line:#EFDDE6;
+  --text:#3C2B36; --dim:#79646F; --faint:#9C8794;
+  --gold:#D95C92; --gold-dim:#F3B9CE; --gold-deep:#A8386B;
+  --mint:#0B8F6F; --coral:#D8453D; --sky:#5A7FD8;
+  --r:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -23,7 +23,7 @@ body{
   background:var(--ink); color:var(--text);
   font-family:'Instrument Sans',system-ui,sans-serif;
   font-size:15px; line-height:1.45;
-  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  padding-bottom:calc(74px + env(safe-area-inset-bottom));
 }
 .wrap{max-width:560px;margin:0 auto;padding:0 14px}
 h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif}
@@ -32,51 +32,68 @@ h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif}
 /* header runway */
 header{padding:16px 0 4px}
 .head-top{display:flex;justify-content:space-between;align-items:baseline}
-.eyebrow{color:var(--gold);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
-.saveline{font-size:11px;color:var(--faint)}
+.title-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.nowline{text-align:right;flex:0 0 auto;padding-bottom:2px}
+.clk{font-size:13px;font-weight:500;line-height:1.2;color:var(--text)}
+.savemini{font-size:10px;color:var(--faint);margin-top:2px;white-space:nowrap}
+.eyebrow{color:var(--gold-deep);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);display:inline-block;margin-right:5px}
 .dot.saving{background:var(--gold)} .dot.err{background:var(--coral)}
 h1{font-size:26px;font-weight:800;line-height:1.05;margin:3px 0 0}
 .runway{margin:12px 0 2px}
 .runway-track{position:relative;height:28px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.runway-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#6d5320,var(--gold));width:0%;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.runway-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#F7B7D0,var(--gold));width:0%;transition:width .9s cubic-bezier(.2,.8,.2,1)}
 .runway-lights{position:absolute;inset:0;display:flex}
-.rl{flex:1;border-right:1px dashed rgba(255,255,255,.08)}
+.rl{flex:1;border-right:1px dashed rgba(0,0,0,.07)}
 .rl:last-child{border-right:none}
 .runway-nums{display:flex;justify-content:space-between;margin-top:6px;align-items:baseline}
 .big-remaining{font-size:22px;font-weight:700}
 .big-remaining small{font-size:11px;color:var(--dim);font-weight:400;margin-left:6px}
 .to-zero{font-size:11px;color:var(--dim);text-align:right}
+/* Today = cover page: no debt summary, bigger wordmark, fits one screen */
+body.cover .runway{display:none}
+body.cover header{padding:20px 0 2px}
+body.cover h1{font-size:clamp(42px,13vw,62px);line-height:.95;letter-spacing:-.03em}
+body.cover .title-row{align-items:flex-end;margin-bottom:10px}
+body.cover .nowline{padding-bottom:6px}
+body.cover .clk{font-size:14px}
+body.cover #today-card{margin-top:6px}
 
 /* pages + tabbar */
 .page{display:none}
 .page.active{display:block}
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:rgba(16,20,31,.94);backdrop-filter:blur(10px);
+  background:rgba(251,244,247,.93);backdrop-filter:blur(10px);
   border-top:1px solid var(--line);
-  display:flex;justify-content:space-around;
-  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  display:flex;justify-content:space-around;align-items:center;
+  padding:7px 6px calc(9px + env(safe-area-inset-bottom));
 }
 .tab{
-  flex:1;text-align:center;color:var(--faint);font-size:12px;font-weight:600;
-  background:transparent;border:none;padding:8px 4px;border-radius:10px;cursor:pointer;
-  font-family:'Instrument Sans',sans-serif;
+  flex:0 1 auto;text-align:center;color:var(--faint);font-size:11px;font-weight:600;
+  background:transparent;border:none;padding:6px 16px;border-radius:9px;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;line-height:1.3;
 }
-.tab .ic{display:block;font-size:16px;margin-bottom:2px}
-.tab.active{color:var(--gold);background:rgba(242,184,75,.08)}
+.tab .ic{display:block;font-size:15px;margin-bottom:1px;opacity:.9}
+.tab.active{color:var(--gold-deep);background:rgba(217,92,146,.13)}
 
 /* cards */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0;box-shadow:0 2px 10px rgba(140,80,110,.05)}
 .card h2{font-size:16px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
 .card h2 .tag{font-size:11px;color:var(--dim);font-weight:400}
-#today-card{border-color:var(--gold-dim);background:linear-gradient(180deg,#221f16 0%,var(--panel) 60%)}
+#today-card{border-color:var(--gold-dim);background:linear-gradient(180deg,#FFF0F6 0%,var(--panel) 62%)}
 .allow{font-size:52px;font-weight:700;line-height:1;letter-spacing:-.02em}
 .allow .cur{font-size:20px;color:var(--gold);vertical-align:16px;margin-right:2px}
 .allow-sub{color:var(--dim);font-size:13px;margin-top:4px}
-.why{margin-top:10px;font-size:13px;color:var(--gold);background:rgba(242,184,75,.08);border:1px solid rgba(242,184,75,.25);padding:8px 10px;border-radius:10px}
+.why{margin-top:10px;font-size:13px;color:var(--gold-deep);background:rgba(217,92,146,.08);border:1px solid rgba(217,92,146,.2);padding:8px 10px;border-radius:12px}
 .why.neutral{color:var(--dim);background:transparent;border-color:var(--line)}
 .spent-row{display:flex;gap:8px;margin-top:14px}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.dow span{text-align:center;font-size:10px;color:var(--faint);font-weight:600;letter-spacing:.06em}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:5px}
+.day.blank{border:none;background:transparent;cursor:default;min-height:44px}
+.day.out{opacity:.55;border-style:dashed}
+.day.out .d{color:var(--sky)}
 input[type=number],input[type=text]{
   background:var(--panel2);border:1px solid var(--line);color:var(--text);
   border-radius:10px;padding:11px 12px;font-size:16px;width:100%;
@@ -92,7 +109,7 @@ select:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transpa
 button{
   font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:14px;
   border:none;border-radius:10px;padding:11px 16px;cursor:pointer;
-  background:var(--gold);color:#221a08;white-space:nowrap;
+  background:var(--gold);color:#fff;white-space:nowrap;
 }
 button:active{transform:translateY(1px)}
 button.ghost{background:transparent;color:var(--sky);border:1px solid var(--line)}
@@ -101,12 +118,11 @@ button.small{padding:6px 10px;font-size:12px;border-radius:8px}
 .week-line{margin-top:6px;font-size:12px;color:var(--faint)}
 
 /* day chips */
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
 .day{border:1px solid var(--line);border-radius:9px;padding:6px 2px;text-align:center;background:var(--panel2);cursor:pointer;min-height:44px}
 .day .d{font-size:10px;color:var(--faint)}
 .day .v{font-size:12px;font-weight:500;margin-top:2px}
-.day.under{border-color:rgba(87,217,163,.5)} .day.under .v{color:var(--mint)}
-.day.over{border-color:rgba(255,122,107,.55)} .day.over .v{color:var(--coral)}
+.day.under{border-color:rgba(11,143,111,.45)} .day.under .v{color:var(--mint)}
+.day.over{border-color:rgba(216,69,61,.5)} .day.over .v{color:var(--coral)}
 .day.today-d{outline:2px solid var(--gold);outline-offset:-1px}
 .day.future{opacity:.35;cursor:default}
 .day.sel{outline:2px solid var(--sky);outline-offset:-1px}
@@ -117,7 +133,7 @@ button.small{padding:6px 10px;font-size:12px;border-radius:8px}
   background:transparent;display:flex;align-items:center;justify-content:center;
   font-size:15px;cursor:pointer;color:transparent;padding:0;
 }
-.tick.done{background:var(--mint);border-color:var(--mint);color:#0b2b1e}
+.tick.done{background:var(--mint);border-color:var(--mint);color:#fff}
 .tick.late{border-color:var(--coral);color:var(--coral)}
 .pay{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .pay:last-child{border-bottom:none}
@@ -136,7 +152,9 @@ button.small{padding:6px 10px;font-size:12px;border-radius:8px}
 
 /* envelope */
 .env{margin:12px 0 2px}
-.env-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;gap:8px}
+.env-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;gap:8px;align-items:baseline;white-space:nowrap}
+.envlab{overflow:hidden;text-overflow:ellipsis}
+.envfig{flex:0 0 auto;font-size:11.5px}
 .bar{height:9px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;position:relative}
 .bar i{display:block;height:100%;background:var(--gold);border-radius:6px;transition:width .5s}
 .bar i.hot{background:var(--coral)}
@@ -150,6 +168,7 @@ button.small{padding:6px 10px;font-size:12px;border-radius:8px}
 .acct .an small{display:block;color:var(--faint);font-size:11px;margin-top:1px}
 .acct .av{text-align:right}
 .acct .av .n{font-size:16px;font-weight:600}
+.acct .av .n.editable{cursor:pointer;text-decoration:underline dotted var(--faint);text-underline-offset:3px}
 .acct .av small{display:block;color:var(--faint);font-size:10px}
 .acct .abar{height:4px;border-radius:3px;background:var(--panel2);margin-top:5px;overflow:hidden}
 .acct .abar i{display:block;height:100%;background:var(--mint)}
@@ -161,7 +180,7 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
 
 /* overdraft gauge */
 .od-scale{position:relative;height:12px;border-radius:6px;margin:14px 2px 24px;background:linear-gradient(90deg,var(--coral) 0%,var(--gold) 55%,var(--mint) 100%)}
-.od-pin{position:absolute;top:-7px;width:3px;height:26px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,.6)}
+.od-pin{position:absolute;top:-7px;width:3px;height:26px;background:var(--text);border-radius:2px;box-shadow:0 0 5px rgba(0,0,0,.25)}
 .od-pin::after{content:attr(data-l);position:absolute;top:28px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);white-space:nowrap;font-family:'Spline Sans Mono',monospace}
 .od-pin.ghostpin{background:var(--sky);opacity:.9}
 .od-note{font-size:13px;color:var(--dim);margin-top:6px}
@@ -189,7 +208,7 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
 .switch input{opacity:0;width:0;height:0}
 .slider{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--line);border-radius:20px;cursor:pointer;transition:.2s}
 .slider::before{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--faint);transition:.2s}
-.switch input:checked + .slider{background:rgba(242,184,75,.25);border-color:var(--gold)}
+.switch input:checked + .slider{background:rgba(217,92,146,.22);border-color:var(--gold)}
 .switch input:checked + .slider::before{transform:translateX(20px);background:var(--gold)}
 .cust-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
 .cust-row:last-child{border-bottom:none}
@@ -199,8 +218,15 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .form-grid .full{grid-column:1/-1}
 .footer-note{color:var(--faint);font-size:12px;margin:22px 0 10px}
+textarea#bk-box{
+  width:100%;height:96px;margin:8px 0;resize:vertical;
+  background:var(--panel2);border:1px solid var(--line);color:var(--dim);
+  border-radius:10px;padding:10px 12px;font-size:12px;
+  font-family:'Spline Sans Mono',monospace;
+}
+textarea#bk-box:focus{outline:2px solid var(--gold);border-color:transparent}
 .reset{color:var(--coral);background:transparent;border:1px solid var(--line);width:100%;margin-top:8px}
-.banner{background:rgba(255,122,107,.12);border:1px solid rgba(255,122,107,.4);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0;display:none}
+.banner{background:rgba(216,69,61,.08);border:1px solid rgba(216,69,61,.28);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0;display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -210,9 +236,14 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
 <header>
   <div class="head-top">
     <div class="eyebrow">Kelly · 21 Jul 2026 → end of 2027</div>
-    <div class="saveline"><span class="dot" id="save-dot"></span><span id="save-txt">Saved</span></div>
   </div>
-  <h1>Runway</h1>
+  <div class="title-row">
+    <h1>Runway</h1>
+    <div class="nowline">
+      <div class="clk mono" id="clock">—</div>
+      <div class="savemini"><span class="dot" id="save-dot"></span><span id="save-txt">Saved</span></div>
+    </div>
+  </div>
   <div class="runway">
     <div class="runway-track">
       <div class="runway-fill" id="rw-fill"></div>
@@ -235,11 +266,12 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
     <div class="allow-sub" id="allow-sub"></div>
     <div class="why neutral" id="why"></div>
     <div class="spent-row">
-      <input type="number" inputmode="decimal" step="0.01" min="0" id="spend-in" placeholder="Add spend…">
+      <input type="number" inputmode="decimal" step="0.01" min="0" id="spend-in" placeholder="Add today's spend…">
       <button id="spend-add">Log it</button>
     </div>
     <div class="today-log" id="today-log"></div>
     <div class="week-line" id="week-line"></div>
+    <div class="dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
     <div class="days" id="daygrid"></div>
     <div id="day-edit" style="display:none;margin-top:10px">
       <div class="week-line" id="day-edit-label"></div>
@@ -251,7 +283,7 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
       </div>
     </div>
   </div>
-  <div class="card">
+  <div class="card" id="due-card">
     <h2>Due soon <span class="tag">next two weeks</span></h2>
     <div id="due-soon"></div>
   </div>
@@ -281,7 +313,7 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
       <span style="color:var(--faint)">the climb after April assumes "yours to enjoy" money stays unspent — it's a ceiling, not a prediction</span>
     </div>
     <div class="spent-row" style="margin-top:12px">
-      <input type="number" inputmode="decimal" step="0.01" id="bal-in" placeholder="Current Monzo balance, e.g. -920.10">
+      <input type="number" inputmode="decimal" step="0.01" id="bal-in" placeholder="Correct the Monzo balance">
       <button class="ghost" id="bal-save">Update</button>
     </div>
     <div class="od-scale" id="od-scale">
@@ -346,6 +378,18 @@ canvas.chart{width:100%;height:190px;display:block;margin-top:8px}
     <div class="pnote">Pay rises, inflation, a different envelope: open any phase in Plan and set its income or envelope directly — the forecast follows. The Barclaycard schedule assumes the old promo dies March 2027 (confirmed) and the new £490 tranche rides at 0% to July 2027. Overdraft interest (39% EAR) is modelled daily; that's why the bank line sags when it's negative.</div>
   </div>
 
+  <div class="card">
+    <h2>Backup <span class="tag">move or recover your data</span></h2>
+    <div class="pnote" style="margin:0 0 10px" id="bk-stats"></div>
+    <div class="spent-row" style="margin-top:0">
+      <button class="ghost" id="bk-export">Show my data</button>
+      <button class="ghost" id="bk-copy">Copy</button>
+    </div>
+    <textarea id="bk-box" placeholder="Tap “Show my data”, then Copy. To restore, paste a backup here and tap Restore."></textarea>
+    <button class="ghost" id="bk-import" style="width:100%">Restore from the box</button>
+    <div class="pnote">Your entries live in whichever browser address you opened this from, so they don't travel with the file. Before moving it to GitHub Pages — or a new phone — copy your data here and paste it in on the other side. Restoring replaces everything currently saved.</div>
+  </div>
+
   <div class="footer-note">
     <b>How it works:</b> each phase has an everyday envelope — groceries, lunches, all flexible spending. Daily logs fill it; overspend and tomorrow's allowance absorbs it, underspend and it grows. Phase deficits roll forward instead of "failing". Phases roll over automatically on their dates. After 28 March the runway becomes Chapter 2 — the postgrad loan — then surplus months with room deliberately left to enjoy. Data saves in Claude, or in your browser when you host the file yourself; replacing the file with a future version at the same address keeps your history.
     <button class="reset" id="reset">Reset everything</button>
@@ -390,8 +434,8 @@ const P = [
   note:"Final loan payment 21 March. One Barclaycard payment left after this."},
  {id:"p9", n:"09", title:"Zero", from:"2027-03-25", to:"2027-04-24", cur:"£", envelope:910, income:4900, payday:"2027-03-25",
   note:"Last Barclaycard payment clears everything. £200/mo to Mum resumes. Chapter 2 starts next phase — buffer, the postgrad loan, and breathing room on purpose."},
- {id:"p10", n:"10", title:"Chapter 2 · buffer + PGL", from:"2027-04-25", to:"2027-05-24", cur:"£", envelope:910, income:4900, payday:"2027-04-25", pglEdit:true,
-  note:"Consumer debt is gone; the postgrad loan (RPI+3%, ~£470/mo taken in payroll) is the new target — at a pace that leaves ~£500/mo yours. Update the PGL balance below from your SLC account; payroll's been chipping it all year."},
+ {id:"p10", n:"10", title:"Chapter 2 · buffer + PGL", from:"2027-04-25", to:"2027-05-24", cur:"£", envelope:910, income:4900, payday:"2027-04-25",
+  note:"Consumer debt is gone; the postgrad loan is the new target — at a pace that leaves ~£500/mo yours. Payroll has been chipping it all along and interest has been added, so the balance you see on Picture is the live one; correct it there against SLC whenever you check."},
  {id:"p11", n:"11", title:"PGL, steadily", from:"2027-05-25", to:"2027-06-24", cur:"£", envelope:910, income:4900, payday:"2027-05-25",
   note:"£1,800 at the loan — deliberate pace, not monk-mode. ~£700/mo stays yours for the life part."},
  {id:"p12", n:"12", title:"PGL, steadily", from:"2027-06-25", to:"2027-07-24", cur:"£", envelope:910, income:4900, payday:"2027-06-25", note:""},
@@ -486,7 +530,7 @@ const PAY = [
  {id:"subs-p13", ph:"p13", date:"2027-08-01", label:"Subs", amt:91, debt:null},
  {id:"commute-p13", ph:"p13", date:"2027-08-01", label:"Commute", amt:450, debt:null},
  {id:"mum-p13", ph:"p13", date:"2027-07-25", label:"Mum", amt:200, debt:null},
- {id:"pgl-p13", ph:"p13", date:"2027-07-25", label:"PGL — settle the remainder (SLC figure)", amt:1900, debt:"pgl"},
+ {id:"pgl-p13", ph:"p13", date:"2027-07-25", label:"PGL — settle the remainder (get the SLC figure)", amt:300, debt:"pgl"},
 
  {id:"bills-p14", ph:"p14", date:"2027-09-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
  {id:"subs-p14", ph:"p14", date:"2027-09-01", label:"Subs", amt:91, debt:null},
@@ -520,8 +564,10 @@ const PAY = [
 const KEY="k-rtz-v1";
 let S = {
   spend:{}, pays:{}, oneoffs:{}, trip:{onFlex:true, budget:700, actual:null},
-  legroom:false, balance:{v:-920.10, at:"2026-07-21"}, incomes:{}, custom:[], pgl:{start:7000},
-  amounts:{}, env:{}, rate:1.70
+  legroom:false, balance:{v:-920.10, at:"2026-07-21"}, incomes:{}, custom:[],
+  pgl:{start:10091.50, at:"2026-07-20", rate:7.3, dedCC:270, dedSep:280, dedNew:470},
+  plan2:{v:139940.18, at:"2026-07-20"},
+  acct:{}, amounts:{}, env:{}, rate:1.70
 };
 let store=(()=>{
   try{ if(window.storage) return "claude"; }catch(e){}
@@ -576,8 +622,8 @@ function setDot(k,t){
 }
 /* ============ helpers ============ */
 const D = s => new Date(s+"T00:00:00");
-const ISO = d => d.toISOString().slice(0,10);
-function addDays(s,n){ return ISO(new Date(D(s).getTime()+n*86400000)); }
+const ISO = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function addDays(s,n){ const d=D(s); d.setDate(d.getDate()+n); return ISO(d); }
 function todayISO(){
   const now=new Date();
   const t=ISO(new Date(now.getFullYear(),now.getMonth(),now.getDate()));
@@ -587,7 +633,7 @@ function todayISO(){
 }
 const fm = (n,dp=0) => (n<0?"−":"")+Math.abs(n).toLocaleString("en-GB",{minimumFractionDigits:dp,maximumFractionDigits:dp});
 function daysBetween(a,b){ return Math.round((D(b)-D(a))/86400000); }
-function phaseOf(t){ return P.find(p=>t>=p.from && t<=p.to) || P[P.length-1]; }
+function phaseOf(t){ if(t<P[0].from) return P[0]; return P.find(p=>t>=p.from && t<=p.to) || P[P.length-1]; }
 function phFirstOfMonth(p){ const d=D(p.from); return ISO(new Date(d.getFullYear(), d.getMonth()+1, 1)); }
 function rateFx(){ return (S.rate&&S.rate>0)?S.rate:1.70; }
 function tripCost(){ return S.trip.actual!=null?S.trip.actual:S.trip.budget; }
@@ -595,7 +641,8 @@ function envOf(p){ return (S.env&&S.env[p.id]!=null)?S.env[p.id]:p.envelope; }
 function incomeOf(p){ return (S.incomes&&S.incomes[p.id]!=null)?S.incomes[p.id]:(p.income||0); }
 function payAmt(pm){ return (S.amounts&&S.amounts[pm.id]!=null)?S.amounts[pm.id]:pm.amt; }
 function payActual(pm){ const r=S.pays[pm.id]; return r&&r.done ? (r.actual!=null?r.actual:payAmt(pm)) : null; }
-let selDay=null, editPay=null, editOO=null, openPhases=null, activeTab="pg-today";
+let selDay=null, editPay=null, editOO=null, openPhases=null, activeTab="pg-today", lastDay=null, editAcct=null;
+function bucketFor(d){ return d<P[0].from ? "pre" : phaseOf(d).id; }
 function allPays(){
   const list = PAY.slice();
   if(S.trip.onFlex){
@@ -670,17 +717,32 @@ function simulate(){
   });
   const bal={amex:START.amex,bcard:START.bcard,flex:START.flex,loan:START.loan};
   if(S.trip.onFlex) bal.flex+=tripCost();
-  let pgl=(S.pgl&&S.pgl.start!=null)?S.pgl.start:7000;
+  const A=S.acct||{};
+  const pglCfg=S.pgl||{};
+  let pgl=pglCfg.start!=null?pglCfg.start:10091.50;
+  const pglRate=(pglCfg.rate!=null?pglCfg.rate:7.3)/100;
+  const dedFor=phId=>{
+    if(phId==="p2") return pglCfg.dedCC!=null?pglCfg.dedCC:270;
+    if(phId==="p3") return pglCfg.dedSep!=null?pglCfg.dedSep:280;
+    return pglCfg.dedNew!=null?pglCfg.dedNew:470;
+  };
   let bank=null, saved=0;
   const odDaily=Math.pow(1.39,1/365)-1;
   const series=[];
-  let d=t0;
-  while(d<=tEnd){
+  let d=t0, guard=0;
+  while(d<=tEnd && guard++<3000){
     if(d===anchorDate){ bank=S.balance.v; }
+    for(const k in bal){ if(A[k]&&A[k].at===d && A[k].v!=null) bal[k]=A[k].v; }
+    if(A.pgl&&A.pgl.at===d&&A.pgl.v!=null) pgl=A.pgl.v;
+    if(d.slice(8)==="01" && pgl>0) pgl+=pgl*pglRate/12;
     const p=phaseOf(d);
     const rf=p.cur==="S$"?rateFx():1;
-    // income
-    for(const ph of P){ if(ph.payday===d && bank!=null){ bank+=incomeOf(ph); } }
+    for(const ph of P){
+      if(ph.payday===d){
+        if(bank!=null) bank+=incomeOf(ph);
+        if(pgl>0) pgl=Math.max(0, pgl-Math.min(pgl, dedFor(ph.id)));
+      }
+    }
     // payments
     const fl=flowsByDate[d]||[];
     for(const f of fl){
@@ -757,7 +819,7 @@ function drawChart(id, sim, seriesCfg, opts){
   const range=(hi-lo)||1; lo-=range*0.06; hi+=range*0.06;
   const Y=v=>padT+(1-(v-lo)/(hi-lo))*(H-padT-padB);
   // month grid
-  g.strokeStyle="rgba(255,255,255,.06)"; g.fillStyle="#5A6378";
+  g.strokeStyle="rgba(0,0,0,.07)"; g.fillStyle="#9C8794";
   g.font="9px 'Spline Sans Mono',monospace"; g.textAlign="center";
   let md=new Date(D(t0).getFullYear(),D(t0).getMonth()+1,1), i=0;
   while(ISO(md)<=tEnd){
@@ -770,7 +832,7 @@ function drawChart(id, sim, seriesCfg, opts){
   g.textAlign="right";
   for(let k=0;k<=3;k++){
     const v=lo+(hi-lo)*k/3, y=Y(v);
-    g.strokeStyle="rgba(255,255,255,.06)";
+    g.strokeStyle="rgba(0,0,0,.07)";
     g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke();
     g.fillText((Math.abs(v)>=1000? (v/1000).toFixed(v%1000===0?0:1)+"k" : Math.round(v)), padL-4, y+3);
   }
@@ -782,7 +844,7 @@ function drawChart(id, sim, seriesCfg, opts){
   }}
   // today marker
   const xT=X(sim.today);
-  g.strokeStyle="rgba(242,184,75,.4)"; g.setLineDash([2,4]);
+  g.strokeStyle="rgba(217,92,146,.45)"; g.setLineDash([2,4]);
   g.beginPath(); g.moveTo(xT,padT); g.lineTo(xT,H-padB); g.stroke(); g.setLineDash([]);
   // series
   for(const cfg of seriesCfg){
@@ -842,17 +904,20 @@ function buildPayRow(pm, t, container, ctxKey){
   }
 }
 /* ============ header ============ */
-function renderHeader(dr, t){
-  const ch2 = t>"2027-03-28" || dr.rem<=0.5;
-  const pct = ch2 ? Math.min(100,Math.max(0,100*(1-dr.pglRem/Math.max(1,dr.pglStart))))
-                  : Math.min(100,Math.max(0,100*(1-dr.rem/dr.startTotal)));
+function renderHeader(dr, t, at){
+  const rem = at? at.totalDebt : dr.rem;
+  const pglNow = at? at.pgl : dr.pglStart;
+  const ch2 = t>"2027-03-28" || rem<=0.5;
+  const pglStart=(S.pgl&&S.pgl.start!=null)?S.pgl.start:10091.50;
+  const pct = ch2 ? Math.min(100,Math.max(0,100*(1-pglNow/Math.max(1,pglStart))))
+                  : Math.min(100,Math.max(0,100*(1-rem/dr.startTotal)));
   document.getElementById("rw-fill").style.width=pct.toFixed(1)+"%";
   document.getElementById("rw-left").innerHTML= ch2
-    ? "£"+fm(dr.pglRem)+"<small>postgrad loan left</small>"
-    : "£"+fm(dr.rem)+"<small>still to clear</small>";
+    ? "£"+fm(pglNow)+"<small>postgrad loan left</small>"
+    : "£"+fm(rem)+"<small>still to clear</small>";
   const dleft=daysBetween(t,"2027-03-28");
   document.getElementById("rw-days").innerHTML= ch2
-    ? (dr.pglRem<=0.5 ? "PGL gone — ~£470/mo back in your pay" : "Chapter 2 · the postgrad loan")
+    ? (pglNow<=0.5 ? "PGL gone — ~£470/mo back in your pay" : "Chapter 2 · the postgrad loan")
     : (dleft>0? "<b class='mono'>"+dleft+"</b> days to the last payment<br>28 Mar 2027" : "Chapter 1 done.");
   const lights=document.getElementById("rw-lights"); lights.innerHTML="";
   P.forEach(p=>{ const s=document.createElement("div"); s.className="rl"; lights.appendChild(s); });
@@ -863,30 +928,39 @@ function renderToday(t, cp, em){
   const cur=cp.cur; document.getElementById("allow-cur").textContent=cur;
   const daysLeftIncl=daysBetween(t,cp.to)+1;
   const spentToday=(S.spend[cp.id]||{})[t]||0;
-  const allowance=Math.max(0,(em[cp.id].remaining+spentToday))/Math.max(1,daysLeftIncl);
-  document.getElementById("allow-num").textContent=fm(allowance,2);
+  const dayBudget=Math.max(0,(em[cp.id].remaining+spentToday))/Math.max(1,daysLeftIncl);
+  const leftToday=dayBudget-spentToday;
+  const an=document.getElementById("allow-num");
+  an.textContent=fm(leftToday,2);
+  document.getElementById("allow").style.color = leftToday<0 ? "var(--coral)" : "";
   const base=envOf(cp)/(daysBetween(cp.from,cp.to)+1);
-  document.getElementById("allow-sub").textContent="today's recalibrated allowance · phase "+cp.n+" ends "+D(cp.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  document.getElementById("allow-sub").textContent="left today, of "+cur+fm(dayBudget,2)+" · phase "+cp.n+" ends "+D(cp.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
   const why=document.getElementById("why");
-  const diff=allowance-base;
+  const diff=dayBudget-base;
   why.style.color="";
   if(em[cp.id].remaining<0){
     why.className="why"; why.textContent="Envelope fully used — the excess rolls into next phase. Not a failure: the road just restructured. Aim for light days where you can.";
   } else if(Math.abs(diff)<0.5){ why.className="why neutral"; why.textContent="Bang on plan. Base rate is "+cur+fm(base,0)+"/day."; }
   else if(diff<0){ why.className="why"; why.textContent="Running "+cur+fm(-diff*daysLeftIncl,0)+" over so far — each remaining day absorbs a little. Base was "+cur+fm(base,0)+"."; }
   else { why.className="why neutral"; why.style.color="var(--mint)"; why.textContent="Underspent so far — allowance up from "+cur+fm(base,0)+". Banking it beats spending it."; }
-  document.getElementById("today-log").textContent="Logged today: "+cur+fm(spentToday,2);
+  const preTot=Object.values(S.spend.pre||{}).reduce((a,b)=>a+b,0);
+  document.getElementById("today-log").textContent="Logged today: "+cur+fm(spentToday,2)+(preTot?"  ·  before the plan: "+cur+fm(preTot,0)+" (not counted)":"");
   let wk=0; for(let i=0;i<7;i++){const d=addDays(t,-i); if(d>=cp.from) wk+=((S.spend[cp.id]||{})[d]||0);}
   document.getElementById("week-line").textContent="Last 7 days: "+cur+fm(wk,0)+" · envelope left: "+cur+fm(Math.max(0,em[cp.id].remaining),0)+" of "+cur+fm(em[cp.id].effective,0);
   const grid=document.getElementById("daygrid"); grid.innerHTML="";
-  const total=daysBetween(cp.from,cp.to)+1;
-  for(let i=0;i<total;i++){
-    const d=addDays(cp.from,i);
-    const v=(S.spend[cp.id]||{})[d];
+  const gStart=addDays(cp.from, -((D(cp.from).getDay()+6)%7));
+  const gEnd=addDays(cp.to, 6-((D(cp.to).getDay()+6)%7));
+  const cells=daysBetween(gStart,gEnd)+1;
+  for(let i=0;i<cells;i++){
+    const d=addDays(gStart,i);
+    const inPhase = d>=cp.from && d<=cp.to;
     const el=document.createElement("div");
+    if(!inPhase && d>t){ el.className="day blank"; grid.appendChild(el); continue; }
+    const v=(S.spend[bucketFor(d)]||{})[d];
     let cls="day";
+    if(!inPhase) cls+=" out";
     if(d>t) cls+=" future";
-    else if(v!=null) cls+= v<=base+0.001?" under":" over";
+    else if(v!=null && inPhase) cls+= v<=base+0.001?" under":" over";
     if(d===t) cls+=" today-d";
     if(d===selDay) cls+=" sel";
     el.className=cls;
@@ -894,44 +968,59 @@ function renderToday(t, cp, em){
     if(d<=t){ el.onclick=()=>{ selDay=(selDay===d?null:d); render(); }; }
     grid.appendChild(el);
   }
-  if(selDay && (selDay<cp.from || selDay>t)) selDay=null;
+  if(selDay && selDay>t) selDay=null;
   const de=document.getElementById("day-edit");
   if(selDay){
+    const sph=bucketFor(selDay);
+    const scur=sph==="pre"?cp.cur:phaseOf(selDay).cur;
     de.style.display="block";
-    document.getElementById("day-edit-label").textContent="Editing "+D(selDay).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+" ("+cur+")";
+    document.getElementById("day-edit-label").textContent="Editing "+D(selDay).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+" ("+scur+")"+(sph==="pre"?" — before the plan started, logged for the record only":(sph!==cp.id?" — counts against phase "+phaseOf(selDay).n:""));
     const di=document.getElementById("day-in");
-    if(document.activeElement!==di) di.value=(S.spend[cp.id]||{})[selDay]!=null?(S.spend[cp.id]||{})[selDay]:"";
+    if(document.activeElement!==di) di.value=(S.spend[sph]||{})[selDay]!=null?(S.spend[sph]||{})[selDay]:"";
   } else { de.style.display="none"; }
-  /* due soon */
+}
+function renderDue(t){
   const ds=document.getElementById("due-soon"); ds.innerHTML="";
   const horizon=addDays(t,14);
   const upcoming=allPays().filter(pm=>payActual(pm)==null && pm.date<=horizon).slice(0,6);
-  if(!upcoming.length){ ds.innerHTML="<div class='pnote' style='margin:0'>Nothing due in the next two weeks.</div>"; }
+  document.getElementById("due-card").style.display = upcoming.length ? "block" : "none";
   upcoming.forEach(pm=>buildPayRow(pm,t,ds,"due-"));
 }
 /* ============ Picture page ============ */
-function renderPicture(t, dr, sim){
-  const at=sim.series.find(s=>s.d===t)||sim.series[sim.series.length-1];
+function renderPicture(t, dr, sim, at){
+  at = at || sim.series.find(s=>s.d===t) || sim.series[sim.series.length-1];
   const el=document.getElementById("accts"); el.innerHTML="";
-  function acct(name, sub, val, start, invert){
-    const row=document.createElement("div"); row.className="acct";
-    const pctDone=start>0?Math.min(100,Math.max(0,100*(1-val/start))):100;
-    row.innerHTML="<div class='an'><div class='t'>"+name+"</div><small>"+sub+"</small><div class='abar'><i style='width:"+pctDone.toFixed(0)+"%'></i></div></div>"+
-      "<div class='av'><div class='n mono'>£"+fm(val)+"</div><small>"+(invert?"balance":"of £"+fm(start)+" start")+"</small></div>";
-    el.appendChild(row);
+  function row(key, name, sub, val, start, opts){
+    opts=opts||{};
+    const r=document.createElement("div"); r.className="acct";
+    const pctDone=start>0?Math.min(100,Math.max(0,100*(1-val/start))):0;
+    r.innerHTML="<div class='an'><div class='t'>"+name+"</div><small>"+sub+"</small>"+
+      (opts.nobar?"":"<div class='abar'><i style='width:"+pctDone.toFixed(0)+"%'></i></div>")+"</div>"+
+      "<div class='av'><div class='n mono editable' style='"+(opts.color?"color:"+opts.color:"")+"'>£"+fm(val)+"</div><small>"+(opts.foot||"of £"+fm(start)+" start")+"</small></div>";
+    r.querySelector(".n").onclick=()=>{ editAcct=(editAcct===key?null:key); render(); };
+    el.appendChild(r);
+    if(editAcct===key){
+      el.appendChild(mkEditor(Math.round(val*100)/100, "Actual balance today",
+        n=>{
+          if(key==="bank") S.balance={v:n, at:t};
+          else if(key==="plan2") S.plan2={v:n, at:t};
+          else { S.acct=S.acct||{}; S.acct[key]={v:n, at:t}; }
+          editAcct=null; save(); render();
+        },
+        ()=>{editAcct=null; render();}));
+    }
   }
   const bankNow = at.bank!=null?at.bank:S.balance.v;
-  const bkRow=document.createElement("div"); bkRow.className="acct";
-  bkRow.innerHTML="<div class='an'><div class='t'>Monzo current</div><small>limit −£2,000 · update below</small></div>"+
-    "<div class='av'><div class='n mono' style='color:"+(bankNow<0?"var(--coral)":"var(--mint)")+"'>£"+fm(bankNow)+"</div><small>modelled today</small></div>";
-  el.appendChild(bkRow);
-  acct("Amex","min-paying · ~30% APR on the carry", at.amex, START.amex);
-  acct("Barclaycard","old promo dies Mar '27 · £490 tranche 0% to Jul '27", at.bcard, START.bcard);
-  acct("Monzo Flex","0% instalments"+(S.trip.onFlex?" · incl trip":""), at.flex, START.flex+(S.trip.onFlex?tripCost():0));
-  acct("Monzo loan","£700/mo · final 21 Mar", at.loan, START.loan);
-  acct("Postgrad loan","RPI+3% · ~£470/mo via payroll · Chapter 2", at.pgl, dr.pglStart);
-  drawChart("ch-debt", sim, [{key:"totalDebt",color:"#F2B84B"},{key:"saved",color:"#57D9A3"}], {includeY:[0]});
-  drawChart("ch-bank", sim, [{key:"bank",color:"#7FB4FF"}], {guides:[{v:-2000,color:"rgba(255,122,107,.7)"},{v:0,color:"rgba(255,255,255,.25)"}], includeY:[-2400,500]});
+  row("bank","Monzo current","limit −£2,000 · tap to correct", bankNow, 0, {nobar:true, foot:"modelled today", color:bankNow<0?"var(--coral)":"var(--mint)"});
+  row("amex","Amex","min-paying · ~30% APR on the carry", at.amex, START.amex);
+  row("bcard","Barclaycard","old promo dies Mar '27 · £490 tranche 0% to Jul '27", at.bcard, START.bcard);
+  row("flex","Monzo Flex","0% instalments"+(S.trip.onFlex?" · incl trip":""), at.flex, START.flex+(S.trip.onFlex?tripCost():0));
+  row("loan","Monzo loan","£700/mo · final 21 Mar", at.loan, START.loan);
+  row("pgl","Postgrad loan","~£"+fm((S.pgl&&S.pgl.dedNew)||470)+"/mo via payroll + "+((S.pgl&&S.pgl.rate)||7.3)+"% interest — both modelled", at.pgl, (S.pgl&&S.pgl.start)||10091.50);
+  const p2=(S.plan2&&S.plan2.v!=null)?S.plan2.v:139940.18;
+  row("plan2","Plan 2 loan","not targeted — behaves like a graduate tax", p2, 0, {nobar:true, foot:"for context only"});
+  drawChart("ch-debt", sim, [{key:"totalDebt",color:"#D95C92"},{key:"saved",color:"#0B8F6F"}], {includeY:[0]});
+  drawChart("ch-bank", sim, [{key:"bank",color:"#5A7FD8"}], {guides:[{v:-2000,color:"rgba(216,69,61,.65)"},{v:0,color:"rgba(0,0,0,.18)"}], includeY:[-2400,500]});
   /* gauge */
   const bi=document.getElementById("bal-in"); if(document.activeElement!==bi) bi.value=S.balance.v;
   let low=bankNow, horizon=null;
@@ -960,7 +1049,7 @@ function renderPlan(t, cp, em){
     const m=em[p.id], cur=p.cur;
     const env=document.createElement("div"); env.className="env";
     const pct=Math.min(100,(m.spent/Math.max(1,m.effective))*100);
-    env.innerHTML="<div class='env-top'><span>Everyday envelope — groceries, food, life</span><span class='mono'>"+cur+fm(m.spent,0)+" / "+cur+fm(m.effective,0)+(m.effective!==m.env?" <span style='color:var(--faint)'>(was "+fm(m.env,0)+")</span>":"")+"</span></div><div class='bar'><i class='"+(pct>100?"hot":pct>85?"":"cool")+"' style='width:"+Math.min(100,Math.max(2,pct))+"%'></i></div>";
+    env.innerHTML="<div class='env-top'><span class='envlab'>Everyday envelope</span><span class='mono envfig'>"+cur+fm(m.spent,0)+" / "+cur+fm(m.effective,0)+(m.effective!==m.env?" <span style='color:var(--faint)'>(was "+fm(m.env,0)+")</span>":"")+"</span></div><div class='bar'><i class='"+(pct>100?"hot":pct>85?"":"cool")+"' style='width:"+Math.min(100,Math.max(2,pct))+"%'></i></div>";
     body.appendChild(env);
     (p.oneoffs||[]).forEach(o=>{
       if(o.optional){
@@ -1004,12 +1093,6 @@ function renderPlan(t, cp, em){
     we.innerHTML="<input type='number' inputmode='decimal' placeholder='Envelope "+p.cur+fm(envOf(p))+"' value=''><button class='small ghost'>Set envelope</button>";
     we.querySelector("button").onclick=()=>{const v=parseFloat(we.querySelector("input").value); if(!isNaN(v)&&v>=0){S.env=S.env||{}; S.env[p.id]=v; save(); render();}};
     body.appendChild(we);
-    if(p.pglEdit){
-      const w=document.createElement("div"); w.className="actual-edit";
-      w.innerHTML="<input type='number' inputmode='decimal' placeholder='PGL balance (SLC): £"+fm((S.pgl&&S.pgl.start!=null)?S.pgl.start:7000)+"' value=''><button class='small ghost'>Set PGL</button>";
-      w.querySelector("button").onclick=()=>{const v=parseFloat(w.querySelector("input").value); if(!isNaN(v)&&v>=0){S.pgl={start:v}; save(); render();}};
-      body.appendChild(w);
-    }
     if(p.note){const n=document.createElement("div"); n.className="pnote"; n.textContent=p.note; body.appendChild(n);}
     box.querySelector(".phase-head").onclick=()=>{ if(openPhases.has(p.id)) openPhases.delete(p.id); else openPhases.add(p.id); box.classList.toggle("open"); };
     ph.appendChild(box);
@@ -1039,6 +1122,7 @@ function renderMore(){
       el.appendChild(row);
     });
   }
+  bkStats();
 }
 function initCustomForm(){
   const from=document.getElementById("cust-from"), to=document.getElementById("cust-to"), kind=document.getElementById("cust-kind");
@@ -1060,10 +1144,12 @@ function initCustomForm(){
 }
 /* ============ master render ============ */
 function render(){
-  const t=todayISO(), cp=phaseOf(t), em=envMath(), dr=debtsRemaining();
-  renderHeader(dr,t);
-  if(activeTab==="pg-today") renderToday(t,cp,em);
-  else if(activeTab==="pg-picture") renderPicture(t,dr,simulate());
+  const t=todayISO(), cp=phaseOf(t), em=envMath(), dr=debtsRemaining(), sim=simulate();
+  const at=sim.series.find(s=>s.d===t)||sim.series[sim.series.length-1];
+  document.body.classList.toggle("cover", activeTab==="pg-today");
+  renderHeader(dr,t,at);
+  if(activeTab==="pg-today"){ renderToday(t,cp,em); renderDue(t); }
+  else if(activeTab==="pg-picture") renderPicture(t,dr,sim,at);
   else if(activeTab==="pg-plan") renderPlan(t,cp,em);
   else renderMore();
 }
@@ -1078,15 +1164,17 @@ document.getElementById("spend-add").onclick=()=>{
   save(); render();
 };
 document.getElementById("day-set").onclick=()=>{
-  if(!selDay)return; const cp=phaseOf(todayISO());
+  if(!selDay)return;
+  const b=bucketFor(selDay);
   const v=parseFloat(document.getElementById("day-in").value);
   if(isNaN(v)||v<0)return;
-  S.spend[cp.id]=S.spend[cp.id]||{}; S.spend[cp.id][selDay]=v;
+  S.spend[b]=S.spend[b]||{}; S.spend[b][selDay]=v;
   selDay=null; save(); render();
 };
 document.getElementById("day-clear").onclick=()=>{
-  if(!selDay)return; const cp=phaseOf(todayISO());
-  if(S.spend[cp.id]) delete S.spend[cp.id][selDay];
+  if(!selDay)return;
+  const b=bucketFor(selDay);
+  if(S.spend[b]) delete S.spend[b][selDay];
   selDay=null; save(); render();
 };
 document.getElementById("day-close").onclick=()=>{ selDay=null; render(); };
@@ -1103,12 +1191,62 @@ document.getElementById("fx-save").onclick=()=>{
   const v=parseFloat(document.getElementById("fx-in").value);
   if(isNaN(v)||v<=0)return; S.rate=v; document.getElementById("fx-in").value=""; save(); render();
 };
+function bkStats(){
+  let days=0; for(const k in S.spend){ days+=Object.keys(S.spend[k]||{}).length; }
+  const ticks=Object.values(S.pays||{}).filter(x=>x&&x.done).length
+    + Object.values(S.oneoffs||{}).filter(x=>x&&x.done).length;
+  const edits=Object.keys(S.amounts||{}).length+Object.keys(S.env||{}).length+Object.keys(S.incomes||{}).length+Object.keys(S.acct||{}).length;
+  const el=document.getElementById("bk-stats");
+  if(el) el.textContent=days+" day"+(days===1?"":"s")+" logged · "+ticks+" ticked · "+(S.custom||[]).length+" addition"+((S.custom||[]).length===1?"":"s")+" · "+edits+" figure"+(edits===1?"":"s")+" corrected";
+}
+document.getElementById("bk-export").onclick=()=>{
+  document.getElementById("bk-box").value=JSON.stringify(S);
+  document.getElementById("bk-import").textContent="Restore from the box";
+  bkImportArm=false;
+};
+document.getElementById("bk-copy").onclick=async ()=>{
+  const box=document.getElementById("bk-box");
+  if(!box.value) box.value=JSON.stringify(S);
+  const btn=document.getElementById("bk-copy");
+  try{
+    await navigator.clipboard.writeText(box.value);
+    btn.textContent="Copied"; setTimeout(()=>btn.textContent="Copy",1800);
+  }catch(e){
+    try{
+      box.focus(); box.select(); box.setSelectionRange(0,box.value.length);
+      const ok=document.execCommand&&document.execCommand("copy");
+      btn.textContent=ok?"Copied":"Select it and copy";
+    }catch(e2){ btn.textContent="Select it and copy"; }
+    setTimeout(()=>btn.textContent="Copy",2600);
+  }
+};
+let bkImportArm=false, bkT=null;
+document.getElementById("bk-import").onclick=()=>{
+  const btn=document.getElementById("bk-import");
+  const raw=(document.getElementById("bk-box").value||"").trim();
+  if(!raw){ btn.textContent="Paste a backup first"; setTimeout(()=>btn.textContent="Restore from the box",2000); return; }
+  let obj=null;
+  try{ obj=JSON.parse(raw); }catch(e){ btn.textContent="That isn't a valid backup"; setTimeout(()=>btn.textContent="Restore from the box",2400); return; }
+  if(!obj || typeof obj!=="object" || (obj.spend===undefined && obj.pays===undefined)){
+    btn.textContent="That isn't a Runway backup"; setTimeout(()=>btn.textContent="Restore from the box",2400); return;
+  }
+  if(!bkImportArm){
+    bkImportArm=true; btn.textContent="Tap again to replace everything";
+    clearTimeout(bkT); bkT=setTimeout(()=>{bkImportArm=false;btn.textContent="Restore from the box";},3500);
+    return;
+  }
+  bkImportArm=false; btn.textContent="Restored";
+  S=Object.assign({spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470},plan2:{v:139940.18,at:"2026-07-20"},acct:{},amounts:{},env:{},rate:1.70}, obj);
+  selDay=null; editPay=null; editOO=null; editAcct=null;
+  save(); render();
+  setTimeout(()=>{document.getElementById("bk-import").textContent="Restore from the box";},2200);
+};
 let resetArm=false, resetT=null;
 document.getElementById("reset").onclick=async ()=>{
   const b=document.getElementById("reset");
   if(!resetArm){ resetArm=true; b.textContent="Tap again to wipe everything"; clearTimeout(resetT); resetT=setTimeout(()=>{resetArm=false;b.textContent="Reset everything";},3500); return; }
   resetArm=false; b.textContent="Reset everything";
-  S={spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:7000},amounts:{},env:{},rate:1.70};
+  S={spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470},plan2:{v:139940.18,at:"2026-07-20"},acct:{},amounts:{},env:{},rate:1.70};
   selDay=null; editPay=null; editOO=null;
   try{
     if(store==="claude") await window.storage.delete(KEY, false);
@@ -1116,16 +1254,29 @@ document.getElementById("reset").onclick=async ()=>{
   }catch(e){}
   save(); render();
 };
+function tickClock(){
+  const now=new Date();
+  const el=document.getElementById("clock");
+  if(el) el.textContent=now.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+" · "+now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const t=todayISO();
+  if(lastDay!==null && t!==lastDay){ lastDay=t; selDay=null; render(); }
+  else lastDay=t;
+}
+setInterval(tickClock,30000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ tickClock(); render(); } });
 window.addEventListener("resize",()=>{ if(activeTab==="pg-picture") render(); });
 /* ============ init ============ */
 (async ()=>{
   await load();
   if(!S.custom) S.custom=[];
-  if(!S.pgl) S.pgl={start:7000};
+  if(!S.pgl||S.pgl.start==null||S.pgl.start===7000) S.pgl={start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470};
+  if(!S.plan2) S.plan2={v:139940.18,at:"2026-07-20"};
+  if(!S.acct) S.acct={};
   if(!S.amounts) S.amounts={};
   if(!S.env) S.env={};
   if(!S.rate) S.rate=1.70;
   initCustomForm();
+  tickClock();
   render();
 })();
 </script>
