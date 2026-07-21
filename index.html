@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Road to Zero — Kelly's cash-flow tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#10141F; --panel:#1A2030; --panel2:#161B29; --line:#2A3247;
+  --text:#E9ECF4; --dim:#8A93A8; --faint:#5A6378;
+  --gold:#F2B84B; --gold-dim:#8a6a2d;
+  --mint:#57D9A3; --coral:#FF7A6B; --sky:#7FB4FF;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--ink); color:var(--text);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:15px; line-height:1.45;
+  padding-bottom:80px;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif}
+.mono{font-family:'Spline Sans Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- runway header ---------- */
+header{padding:22px 0 6px}
+.eyebrow{color:var(--gold);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+h1{font-size:30px;font-weight:800;line-height:1.05;margin:4px 0 2px}
+.sub{color:var(--dim);font-size:13px}
+.runway{margin:16px 0 4px}
+.runway-track{position:relative;height:34px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.runway-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#6d5320,var(--gold));width:0%;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.runway-lights{position:absolute;inset:0;display:flex}
+.rl{flex:1;border-right:1px dashed rgba(255,255,255,.10);position:relative}
+.rl:last-child{border-right:none}
+.rl.done::after{content:"";position:absolute;right:-3px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.runway-cap{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--dim)}
+.runway-nums{display:flex;justify-content:space-between;margin-top:7px;align-items:baseline}
+.big-remaining{font-size:26px;font-weight:700}
+.big-remaining small{font-size:12px;color:var(--dim);font-weight:400;margin-left:6px}
+.to-zero{font-size:12px;color:var(--dim);text-align:right}
+
+/* ---------- cards ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0}
+.card h2{font-size:16px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.card h2 .tag{font-size:11px;color:var(--dim);font-weight:400}
+
+/* today */
+#today-card{border-color:var(--gold-dim);background:linear-gradient(180deg,#221f16 0%,var(--panel) 60%)}
+.allow{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.allow .cur{font-size:22px;color:var(--gold);vertical-align:18px;margin-right:2px}
+.allow-sub{color:var(--dim);font-size:13px;margin-top:4px}
+.why{margin-top:10px;font-size:13px;color:var(--gold);background:rgba(242,184,75,.08);border:1px solid rgba(242,184,75,.25);padding:8px 10px;border-radius:10px}
+.why.neutral{color:var(--dim);background:transparent;border-color:var(--line)}
+.spent-row{display:flex;gap:8px;margin-top:14px}
+input[type=number],input[type=text]{
+  background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 12px;font-size:16px;width:100%;
+  font-family:'Spline Sans Mono',monospace;
+}
+input:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+select{
+  background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 12px;font-size:15px;width:100%;
+  font-family:'Instrument Sans',sans-serif;appearance:none;
+}
+select:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+.cust-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cust-row:last-child{border-bottom:none}
+.cust-row .cd{flex:1;min-width:0}
+.cust-row .cd small{display:block;color:var(--faint);font-size:11px}
+.x-btn{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--coral);border-radius:8px;padding:6px 10px;font-size:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.form-grid .full{grid-column:1/-1}
+button{
+  font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:14px;
+  border:none;border-radius:10px;padding:11px 16px;cursor:pointer;
+  background:var(--gold);color:#221a08;white-space:nowrap;
+}
+button:active{transform:translateY(1px)}
+button.ghost{background:transparent;color:var(--sky);border:1px solid var(--line)}
+button.small{padding:6px 10px;font-size:12px;border-radius:8px}
+.today-log{margin-top:10px;font-size:13px;color:var(--dim)}
+.week-line{margin-top:6px;font-size:12px;color:var(--faint)}
+
+/* day chips */
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.day{border:1px solid var(--line);border-radius:9px;padding:6px 2px;text-align:center;background:var(--panel2);cursor:pointer;min-height:44px}
+.day .d{font-size:10px;color:var(--faint)}
+.day .v{font-size:12px;font-weight:500;margin-top:2px}
+.day.under{border-color:rgba(87,217,163,.5)} .day.under .v{color:var(--mint)}
+.day.over{border-color:rgba(255,122,107,.55)} .day.over .v{color:var(--coral)}
+.day.today-d{outline:2px solid var(--gold);outline-offset:-1px}
+.day.future{opacity:.35;cursor:default}
+.day.sel{outline:2px solid var(--sky);outline-offset:-1px}
+.amt.editable{cursor:pointer;text-decoration:underline dotted var(--faint);text-underline-offset:3px}
+
+/* alerts */
+.alert-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.alert-item:last-child{border-bottom:none}
+.deadline{font-size:11px;color:var(--coral);font-weight:600}
+.deadline.ok{color:var(--dim);font-weight:400}
+
+/* checkbox */
+.tick{
+  flex:0 0 26px;height:26px;border-radius:8px;border:1.5px solid var(--faint);
+  background:transparent;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;color:transparent;padding:0;
+}
+.tick.done{background:var(--mint);border-color:var(--mint);color:#0b2b1e}
+.tick.late{border-color:var(--coral);color:var(--coral)}
+.alert-body{flex:1;font-size:14px}
+.alert-body .l2{color:var(--dim);font-size:12px;margin-top:1px}
+.done-txt{text-decoration:line-through;color:var(--faint)}
+
+/* payments */
+.pay{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.pay:last-child{border-bottom:none}
+.pay .info{flex:1;min-width:0}
+.pay .name{font-size:14px}
+.pay .due{font-size:11px;color:var(--faint)}
+.pay .due.overdue{color:var(--coral);font-weight:600}
+.pay .amt{font-size:15px;font-weight:500;text-align:right}
+.pay .amt .delta{display:block;font-size:11px;font-weight:400}
+.delta.over{color:var(--coral)} .delta.under{color:var(--mint)}
+.actual-edit{display:flex;gap:6px;margin-top:8px}
+.actual-edit input{padding:8px 10px;font-size:14px}
+
+/* envelope bars */
+.env{margin:12px 0 2px}
+.env-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.bar{height:9px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:6px;transition:width .5s}
+.bar i.hot{background:var(--coral)}
+.bar i.cool{background:var(--mint)}
+
+/* overdraft gauge */
+.od-scale{position:relative;height:12px;border-radius:6px;margin:14px 2px 22px;background:linear-gradient(90deg,var(--coral) 0%,var(--gold) 55%,var(--mint) 100%)}
+.od-pin{position:absolute;top:-7px;width:3px;height:26px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,.6)}
+.od-pin::after{content:attr(data-l);position:absolute;top:28px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);white-space:nowrap;font-family:'Spline Sans Mono',monospace}
+.od-pin.ghostpin{background:var(--sky);opacity:.9}
+.od-note{font-size:13px;color:var(--dim);margin-top:6px}
+.od-note b{color:var(--text)}
+.breach{color:var(--coral)!important;font-weight:600}
+
+/* phases */
+.phase{border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden;background:var(--panel2)}
+.phase-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.phase-head .num{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--gold);flex:0 0 auto}
+.phase-head .t{flex:1;font-size:14px;font-weight:600}
+.phase-head .t small{display:block;font-weight:400;color:var(--faint);font-size:11px}
+.phase-head .st{font-size:11px;color:var(--dim)}
+.phase-body{display:none;padding:0 14px 14px;border-top:1px solid var(--line)}
+.phase.open .phase-body{display:block}
+.phase.now{border-color:var(--gold-dim)}
+.phase.past{opacity:.75}
+.spare{margin-top:10px;font-size:13px;color:var(--mint)}
+.spare.neg{color:var(--coral)}
+.pnote{font-size:12px;color:var(--dim);margin-top:8px;border-left:2px solid var(--line);padding-left:9px}
+
+/* trip */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
+.switch{position:relative;width:46px;height:26px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--line);border-radius:20px;cursor:pointer;transition:.2s}
+.slider::before{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--faint);transition:.2s}
+.switch input:checked + .slider{background:rgba(242,184,75,.25);border-color:var(--gold)}
+.switch input:checked + .slider::before{transform:translateX(20px);background:var(--gold)}
+
+.footer-note{color:var(--faint);font-size:12px;margin:26px 0 10px}
+.footer-note a{color:var(--sky)}
+.reset{color:var(--coral);background:transparent;border:1px solid var(--line);width:100%;margin-top:8px}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:rgba(16,20,31,.9);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 14px;font-size:12px;color:var(--faint);display:flex;justify-content:space-between;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mint);display:inline-block;margin-right:6px}
+.dot.saving{background:var(--gold)} .dot.err{background:var(--coral)}
+.banner{background:rgba(255,122,107,.12);border:1px solid rgba(255,122,107,.4);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0;display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Kelly · 21 Jul 2026 → end of 2027</div>
+  <h1>Road to Zero</h1>
+  <div class="sub">Every number below recalibrates when life happens. Nothing here breaks — it bends.</div>
+  <div class="runway">
+    <div class="runway-track">
+      <div class="runway-fill" id="rw-fill"></div>
+      <div class="runway-lights" id="rw-lights"></div>
+      <div class="runway-cap">£0</div>
+    </div>
+    <div class="runway-nums">
+      <div class="big-remaining mono" id="rw-left">£—<small>still to clear</small></div>
+      <div class="to-zero" id="rw-days"></div>
+    </div>
+  </div>
+</header>
+
+<div class="banner" id="storage-banner">No storage is available in this view, so entries last only for this session. Open it inside Claude, or host the file (e.g. GitHub Pages) and your history will stick.</div>
+
+<!-- TODAY -->
+<div class="card" id="today-card">
+  <h2>Today <span class="tag" id="today-date"></span></h2>
+  <div class="allow mono" id="allow"><span class="cur" id="allow-cur">S$</span><span id="allow-num">—</span></div>
+  <div class="allow-sub" id="allow-sub"></div>
+  <div class="why neutral" id="why"></div>
+  <div class="spent-row">
+    <input type="number" inputmode="decimal" step="0.01" min="0" id="spend-in" placeholder="Add spend…">
+    <button id="spend-add">Log it</button>
+  </div>
+  <div class="today-log" id="today-log"></div>
+  <div class="week-line" id="week-line"></div>
+  <div class="days" id="daygrid"></div>
+  <div id="day-edit" style="display:none;margin-top:10px">
+    <div class="week-line" id="day-edit-label"></div>
+    <div class="spent-row" style="margin-top:6px">
+      <input type="number" inputmode="decimal" step="0.01" min="0" id="day-in" placeholder="Amount">
+      <button class="small" id="day-set">Set</button>
+      <button class="small ghost" id="day-clear">Clear</button>
+      <button class="small ghost" id="day-close">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERDRAFT -->
+<div class="card">
+  <h2>Overdraft watch <span class="tag">limit −£2,000</span></h2>
+  <div class="spent-row" style="margin-top:2px">
+    <input type="number" inputmode="decimal" step="0.01" id="bal-in" placeholder="Current Monzo balance, e.g. -920.10">
+    <button class="ghost" id="bal-save">Update</button>
+  </div>
+  <div class="od-scale" id="od-scale">
+    <div class="od-pin" id="od-now" data-l=""></div>
+    <div class="od-pin ghostpin" id="od-low" data-l=""></div>
+  </div>
+  <div class="od-note" id="od-note"></div>
+  <div class="od-note" style="margin-top:8px;color:var(--faint)">Pressure valve: Flex has ~£1,468 free at 0% over 3 months — always cheaper than riding the overdraft. Amex Gold sits empty as a second buffer.</div>
+</div>
+
+<!-- CURRENT PHASE -->
+<div class="card" id="phase-card">
+  <h2 id="phase-title">This phase</h2>
+  <div id="phase-envs"></div>
+  <div id="phase-pays"></div>
+  <div class="spare" id="phase-spare"></div>
+</div>
+
+<!-- TRIP -->
+<div class="card">
+  <h2>The trip <span class="tag">one, not two</span></h2>
+  <div class="toggle-row">
+    <div style="flex:1">
+      <div style="font-size:14px">Fund it on Flex (3 months, 0%)</div>
+      <div class="l2" style="color:var(--dim);font-size:12px">Keeps the cash out of the danger window. Instalments land 21 Sep / Oct / Nov.</div>
+    </div>
+    <label class="switch"><input type="checkbox" id="trip-flex"><span class="slider"></span></label>
+  </div>
+  <div class="env">
+    <div class="env-top"><span>Budget £<span id="trip-budget-show">700</span></span><span class="mono" id="trip-spent-show">—</span></div>
+    <div class="bar"><i id="trip-bar"></i></div>
+  </div>
+  <div class="spent-row">
+    <input type="number" inputmode="decimal" id="trip-in" placeholder="What it actually cost…">
+    <button class="ghost" id="trip-save">Save</button>
+  </div>
+  <div class="pnote">HK 2–3 nts realistically £650–800 · Bangkok solo £450–550 · solo Samui £800+ (no villa split). If the final number differs, the instalments and later months update themselves.</div>
+</div>
+
+<!-- CUSTOM -->
+<div class="card">
+  <h2>Your additions <span class="tag">life happens</span></h2>
+  <div id="cust-list"></div>
+  <div class="form-grid">
+    <input type="text" id="cust-name" placeholder="Name (e.g. Gym)" class="full">
+    <input type="number" inputmode="decimal" step="0.01" min="0" id="cust-amt" placeholder="£ amount">
+    <select id="cust-kind"><option value="mo">Monthly</option><option value="once">One-off</option></select>
+    <select id="cust-from"></select>
+    <select id="cust-to"><option value="">…onwards</option></select>
+    <button id="cust-add" class="full">Add to the plan</button>
+  </div>
+  <div class="pnote">Each addition lands in the right phases' checklists and reshapes the spare and the overdraft projection instantly. Delete it here to un-decide. To test a car: add the purchase as a one-off and running costs (insurance + fuel + tax + upkeep) as a monthly, then look at what each phase's spare becomes.</div>
+</div>
+
+<!-- ALL PHASES -->
+<div class="card">
+  <h2>The whole road <span class="tag">tap a phase</span></h2>
+  <div id="phases"></div>
+</div>
+
+<div class="footer-note">
+  <b>How recalibration works:</b> each phase has an everyday envelope — groceries, lunches, all flexible spending. Your daily logs fill its bar; overspend a day and tomorrow's allowance absorbs it, underspend and it grows. If a whole phase ends over, the deficit rolls into the next phase's envelope instead of "failing" — the plan restructures, you keep going. Phases roll over automatically on the date: the Today card and day grid reset for the new phase, and the finished phase keeps its totals in the list below. After 28 March the runway becomes Chapter 2 — the postgrad loan — then surplus months: ISA, cash fund, all tap-to-edit. Figures assume ~£4,900/mo net at Carpmaels (£3,000 part-month on 25 Sep, ~£5,370 once the PGL deduction ends). Data saves in Claude, or in your browser if you host the file yourself — replacing the file with a future version on the same address keeps your history.
+  <button class="reset" id="reset">Reset everything</button>
+</div>
+
+</div>
+
+<div class="savebar"><span><span class="dot" id="save-dot"></span><span id="save-txt">Saved</span></span><span class="mono" style="font-size:11px">v1 · 21 Jul 2026 plan</span></div>
+
+<script>
+"use strict";
+/* ============ PLAN (baked from the 21 Jul 2026 position) ============ */
+const RATE = 1.70; // SGD per GBP
+const START = {
+  amex: 2809.91, flex: 1035.26, loan: 5598.05, bcard: 7574.77, od: 920.10
+}; // Amex & Barclaycard shown post-£475.50 transfer (3% fee included)
+const P = [
+ {id:"p1", n:"01", title:"Singapore run-down", from:"2026-07-21", to:"2026-08-20",
+  cur:"S$", envelope: 930, // S$30 x 31 days
+  income:0,
+  note:"Daily cap S$30 average. Everything in this phase is in S$ (≈1.70 to the £). One-offs below sit outside the cap. Assumes the £475.50 balance transfer is done — Amex ~£2,810, Barclaycard ~£7,575.",
+  oneoffs:[
+    {id:"o-drinks1", label:"Party drinks · 26 Jul", amt:135, cur:"S$"},
+    {id:"o-subs", label:"Subs + Singtel + O2 (~£110)", amt:185, cur:"S$"},
+    {id:"o-skin", label:"Skincare / misc buffer", amt:200, cur:"S$"},
+    {id:"o-legroom", label:"Extra legroom seat (~£100, optional)", amt:170, cur:"S$", optional:true},
+    {id:"o-drinks2", label:"Pre-drinks · 20 Aug", amt:70, cur:"S$"}
+  ]},
+ {id:"p2", n:"02", title:"The bridge", from:"2026-08-21", to:"2026-09-24",
+  cur:"£", envelope: 810, income:4300, payday:"2026-08-21", paylabel:"Final CC pay",
+  note:"£810 covers the last Singapore week, living 1–13 Sep, and lunches once you start on the 14th. This stretch runs closest to the overdraft limit — update the gauge weekly. Running low in the final week is planned, not failure."},
+ {id:"p3", n:"03", title:"First Carpmaels pay", from:"2026-09-25", to:"2026-10-24",
+  cur:"£", envelope: 830, income:3000, incomeEditable:true, payday:"2026-09-25", paylabel:"Part-month pay (edit when payslip lands)",
+  note:"Amex takes £1,000 as arranged. Mounjaro restarts. Council tax, energy and cleaner stay with B until next phase."},
+ {id:"p4", n:"04", title:"Full pay · bills begin", from:"2026-10-25", to:"2026-11-24",
+  cur:"£", envelope: 910, income:4900, payday:"2026-10-25",
+  note:"You take over council tax, energy and the cleaner. Barclaycard £1,400s begin. The Amex tail clears on payday — then cancel it for the pro-rata refund (move the Apple subs off first)."},
+ {id:"p5", n:"05", title:"Steady state", from:"2026-11-25", to:"2026-12-24",
+  cur:"£", envelope: 910, income:4900, payday:"2026-11-25",
+  note:"Christmas lives inside this envelope and the spare — presents and travel come from here, not on top."},
+ {id:"p6", n:"06", title:"Steady state", from:"2026-12-25", to:"2027-01-24",
+  cur:"£", envelope: 910, income:4900, payday:"2026-12-25", note:""},
+ {id:"p7", n:"07", title:"Last Mounjaro month", from:"2027-01-25", to:"2027-02-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-01-25",
+  note:"Trying from April means the last dose lands in February (≥1-month washout — confirm the stop date with your prescriber)."},
+ {id:"p8", n:"08", title:"Loan dies", from:"2027-02-25", to:"2027-03-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-02-25",
+  note:"Final loan payment 21 March. One Barclaycard payment left after this."},
+ {id:"p9", n:"09", title:"Zero", from:"2027-03-25", to:"2027-04-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-03-25",
+  note:"Last Barclaycard payment clears everything. £200/mo to Mum resumes. From here ~£2,900/month is yours — and Chapter 2 starts next phase: buffer, then the postgrad loan."},
+ {id:"p10", n:"10", title:"Chapter 2 · buffer + PGL", from:"2027-04-25", to:"2027-05-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-04-25", pglEdit:true,
+  note:"Consumer debt is gone; the postgrad loan (RPI+3%, ~£470/mo taken in payroll) is the new target. First £1,000 starts the emergency buffer. Update the PGL balance below from your SLC account — it'll be lower than you think, payroll's been chipping it."},
+ {id:"p11", n:"11", title:"PGL sprint", from:"2027-05-25", to:"2027-06-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-05-25",
+  note:"£2,300 at the loan. On this pace it dies by July."},
+ {id:"p12", n:"12", title:"PGL sprint", from:"2027-06-25", to:"2027-07-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-06-25", note:""},
+ {id:"p13", n:"13", title:"PGL cleared", from:"2027-07-25", to:"2027-08-24",
+  cur:"£", envelope: 910, income:4900, payday:"2027-07-25",
+  note:"Ask SLC for a settlement figure and clear the tail — then tell payroll. The ~£470/mo deduction stops and joins your surplus from the next payslip."},
+ {id:"p14", n:"14", title:"Surplus, allocated", from:"2027-08-25", to:"2027-09-24",
+  cur:"£", envelope: 910, income:5370, payday:"2027-08-25",
+  note:"Take-home rises ~£470 with the PGL deduction gone. Defaults from here: £2,000 S&S ISA + £1,200 cash fund (house, baby, the surgery pot — your call). Tap any amount to reshape."},
+ {id:"p15", n:"15", title:"Steady", from:"2027-09-25", to:"2027-10-24",
+  cur:"£", envelope: 910, income:5370, payday:"2027-09-25", note:""},
+ {id:"p16", n:"16", title:"Steady", from:"2027-10-25", to:"2027-11-24",
+  cur:"£", envelope: 910, income:5370, payday:"2027-10-25", note:""},
+ {id:"p17", n:"17", title:"Year end", from:"2027-11-25", to:"2027-12-24",
+  cur:"£", envelope: 910, income:5370, payday:"2027-11-25",
+  note:"Christmas comes from the surplus rows, not the envelope. A year and a half from tonight's starting line."}
+];
+const PAY = [
+ // phase 2 onward (phase 1 has no fixed payments):
+ {id:"loan-aug", ph:"p2", date:"2026-08-21", label:"Monzo loan", amt:700, debt:"loan"},
+ {id:"flex-aug", ph:"p2", date:"2026-08-21", label:"Monzo Flex", amt:800, debt:"flex"},
+ {id:"amex-1", ph:"p2", date:"2026-08-21", label:"Amex — part 1", amt:800, debt:"amex"},
+ {id:"bcmin-sep", ph:"p2", date:"2026-09-07", label:"Barclaycard minimum", amt:180, debt:"bcard"},
+ {id:"commute-sep", ph:"p2", date:"2026-09-14", label:"Flexi ticket + bus, to payday", amt:260, debt:null},
+ {id:"flex-sep", ph:"p2", date:"2026-09-21", label:"Monzo Flex", amt:240, debt:"flex"},
+ {id:"loan-sep", ph:"p2", date:"2026-09-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"amex-2", ph:"p3", date:"2026-09-25", label:"Amex — part 2", amt:1000, debt:"amex"},
+ {id:"mj-oct", ph:"p3", date:"2026-09-26", label:"Mounjaro restart", amt:200, debt:null},
+ {id:"subs-oct", ph:"p3", date:"2026-10-01", label:"Subs (both Apple now off Amex)", amt:91, debt:null},
+ {id:"bcmin-oct", ph:"p3", date:"2026-10-07", label:"Barclaycard minimum", amt:180, debt:"bcard"},
+ {id:"commute-oct", ph:"p3", date:"2026-10-01", label:"Commute (Flexi + tube + bus)", amt:450, debt:null},
+ {id:"loan-oct", ph:"p3", date:"2026-10-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"bc-1", ph:"p4", date:"2026-10-28", label:"Barclaycard 1 of 6", amt:1400, debt:"bcard"},
+ {id:"amex-3", ph:"p4", date:"2026-10-25", label:"Amex — final, then cancel for pro-rata refund", amt:1010, debt:"amex"},
+ {id:"bills-nov", ph:"p4", date:"2026-11-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-nov", ph:"p4", date:"2026-11-01", label:"Subs", amt:91, debt:null},
+ {id:"mj-nov", ph:"p4", date:"2026-11-01", label:"Mounjaro", amt:200, debt:null},
+ {id:"commute-nov", ph:"p4", date:"2026-11-01", label:"Commute", amt:450, debt:null},
+ {id:"loan-nov", ph:"p4", date:"2026-11-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"bc-2", ph:"p5", date:"2026-11-28", label:"Barclaycard 2 of 6", amt:1400, debt:"bcard"},
+ {id:"bills-dec", ph:"p5", date:"2026-12-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-dec", ph:"p5", date:"2026-12-01", label:"Subs", amt:91, debt:null},
+ {id:"mj-dec", ph:"p5", date:"2026-12-01", label:"Mounjaro", amt:200, debt:null},
+ {id:"commute-dec", ph:"p5", date:"2026-12-01", label:"Commute", amt:450, debt:null},
+ {id:"loan-dec", ph:"p5", date:"2026-12-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"bc-3", ph:"p6", date:"2026-12-28", label:"Barclaycard 3 of 6", amt:1400, debt:"bcard"},
+ {id:"bills-jan", ph:"p6", date:"2027-01-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-jan", ph:"p6", date:"2027-01-01", label:"Subs", amt:91, debt:null},
+ {id:"mj-jan", ph:"p6", date:"2027-01-01", label:"Mounjaro", amt:200, debt:null},
+ {id:"commute-jan", ph:"p6", date:"2027-01-01", label:"Commute", amt:450, debt:null},
+ {id:"loan-jan", ph:"p6", date:"2027-01-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"bc-4", ph:"p7", date:"2027-01-28", label:"Barclaycard 4 of 6", amt:1400, debt:"bcard"},
+ {id:"bills-feb", ph:"p7", date:"2027-02-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-feb", ph:"p7", date:"2027-02-01", label:"Subs", amt:91, debt:null},
+ {id:"mj-feb", ph:"p7", date:"2027-02-01", label:"Mounjaro — last one", amt:200, debt:null},
+ {id:"commute-feb", ph:"p7", date:"2027-02-01", label:"Commute", amt:450, debt:null},
+ {id:"loan-feb", ph:"p7", date:"2027-02-21", label:"Monzo loan", amt:700, debt:"loan"},
+
+ {id:"bc-5", ph:"p8", date:"2027-02-28", label:"Barclaycard 5 of 6", amt:1400, debt:"bcard"},
+ {id:"bills-mar", ph:"p8", date:"2027-03-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-mar", ph:"p8", date:"2027-03-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-mar", ph:"p8", date:"2027-03-01", label:"Commute", amt:450, debt:null},
+ {id:"loan-mar", ph:"p8", date:"2027-03-21", label:"Monzo loan — FINAL", amt:698, debt:"loan"},
+
+ {id:"bc-6", ph:"p9", date:"2027-03-28", label:"Barclaycard 6 of 6 — clears it", amt:215, debt:"bcard"},
+ {id:"bills-apr", ph:"p9", date:"2027-04-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-apr", ph:"p9", date:"2027-04-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-apr", ph:"p9", date:"2027-04-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-apr", ph:"p9", date:"2027-03-25", label:"Mum — resumes", amt:200, debt:null},
+
+ {id:"bills-p10", ph:"p10", date:"2027-05-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p10", ph:"p10", date:"2027-05-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p10", ph:"p10", date:"2027-05-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p10", ph:"p10", date:"2027-04-25", label:"Mum", amt:200, debt:null},
+ {id:"buf-p10", ph:"p10", date:"2027-04-25", label:"Emergency buffer — first £1,000", amt:1000, debt:null},
+ {id:"pgl-p10", ph:"p10", date:"2027-04-25", label:"PGL overpayment", amt:1800, debt:"pgl"},
+
+ {id:"bills-p11", ph:"p11", date:"2027-06-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p11", ph:"p11", date:"2027-06-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p11", ph:"p11", date:"2027-06-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p11", ph:"p11", date:"2027-05-25", label:"Mum", amt:200, debt:null},
+ {id:"pgl-p11", ph:"p11", date:"2027-05-25", label:"PGL overpayment", amt:2300, debt:"pgl"},
+ {id:"buf-p11", ph:"p11", date:"2027-05-25", label:"Buffer top-up", amt:500, debt:null},
+
+ {id:"bills-p12", ph:"p12", date:"2027-07-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p12", ph:"p12", date:"2027-07-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p12", ph:"p12", date:"2027-07-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p12", ph:"p12", date:"2027-06-25", label:"Mum", amt:200, debt:null},
+ {id:"pgl-p12", ph:"p12", date:"2027-06-25", label:"PGL overpayment", amt:2300, debt:"pgl"},
+ {id:"buf-p12", ph:"p12", date:"2027-06-25", label:"Buffer top-up", amt:500, debt:null},
+
+ {id:"bills-p13", ph:"p13", date:"2027-08-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p13", ph:"p13", date:"2027-08-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p13", ph:"p13", date:"2027-08-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p13", ph:"p13", date:"2027-07-25", label:"Mum", amt:200, debt:null},
+ {id:"pgl-p13", ph:"p13", date:"2027-07-25", label:"PGL — settle the remainder (SLC figure)", amt:700, debt:"pgl"},
+ {id:"isa-p13", ph:"p13", date:"2027-07-25", label:"S&S ISA — first month", amt:1500, debt:null},
+
+ {id:"bills-p14", ph:"p14", date:"2027-09-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p14", ph:"p14", date:"2027-09-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p14", ph:"p14", date:"2027-09-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p14", ph:"p14", date:"2027-08-25", label:"Mum", amt:200, debt:null},
+ {id:"isa-p14", ph:"p14", date:"2027-08-25", label:"S&S ISA", amt:2000, debt:null},
+ {id:"fund-p14", ph:"p14", date:"2027-08-25", label:"Cash fund — house / baby / surgery", amt:1200, debt:null},
+
+ {id:"bills-p15", ph:"p15", date:"2027-10-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p15", ph:"p15", date:"2027-10-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p15", ph:"p15", date:"2027-10-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p15", ph:"p15", date:"2027-09-25", label:"Mum", amt:200, debt:null},
+ {id:"isa-p15", ph:"p15", date:"2027-09-25", label:"S&S ISA", amt:2000, debt:null},
+ {id:"fund-p15", ph:"p15", date:"2027-09-25", label:"Cash fund", amt:1200, debt:null},
+
+ {id:"bills-p16", ph:"p16", date:"2027-11-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p16", ph:"p16", date:"2027-11-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p16", ph:"p16", date:"2027-11-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p16", ph:"p16", date:"2027-10-25", label:"Mum", amt:200, debt:null},
+ {id:"isa-p16", ph:"p16", date:"2027-10-25", label:"S&S ISA", amt:2000, debt:null},
+ {id:"fund-p16", ph:"p16", date:"2027-10-25", label:"Cash fund", amt:1200, debt:null},
+
+ {id:"bills-p17", ph:"p17", date:"2027-12-01", label:"Council tax + energy + cleaner", amt:443, debt:null},
+ {id:"subs-p17", ph:"p17", date:"2027-12-01", label:"Subs", amt:91, debt:null},
+ {id:"commute-p17", ph:"p17", date:"2027-12-01", label:"Commute", amt:450, debt:null},
+ {id:"mum-p17", ph:"p17", date:"2027-11-25", label:"Mum", amt:200, debt:null},
+ {id:"isa-p17", ph:"p17", date:"2027-11-25", label:"S&S ISA", amt:2000, debt:null},
+ {id:"fund-p17", ph:"p17", date:"2027-11-25", label:"Cash fund + Christmas", amt:1200, debt:null}
+];
+/* ============ state ============ */
+const KEY="k-rtz-v1";
+let S = {
+  spend:{}, pays:{}, oneoffs:{}, trip:{onFlex:true, budget:700, actual:null},
+  legroom:false, balance:{v:-920.10, at:"2026-07-21"}, incomes:{}, custom:[], pgl:{start:7000}
+};
+let store=(()=>{
+  try{ if(window.storage) return "claude"; }catch(e){}
+  try{ const t="__rtz_probe"; window.localStorage.setItem(t,"1"); window.localStorage.removeItem(t); return "local"; }catch(e){}
+  return "none";
+})();
+let saveT=null;
+async function load(){
+  if(store==="none"){document.getElementById("storage-banner").style.display="block";return;}
+  try{
+    if(store==="claude"){
+      const r = await window.storage.get(KEY, false);
+      if(r && r.value){ S = Object.assign(S, JSON.parse(r.value)); return; }
+    }
+  }catch(e){ /* fall through */ }
+  try{
+    const v = window.localStorage.getItem(KEY);
+    if(v){ S = Object.assign(S, JSON.parse(v)); }
+  }catch(e){ /* first run — nothing saved yet */ }
+}
+async function doSave(){
+  if(store==="none") throw new Error("nostore");
+  try{
+    if(store==="claude"){
+      const r = await window.storage.set(KEY, JSON.stringify(S), false);
+      if(!r) throw new Error("setfail");
+    } else {
+      window.localStorage.setItem(KEY, JSON.stringify(S));
+    }
+  }catch(e){
+    // primary failed — try the browser's own storage as a lifeboat
+    window.localStorage.setItem(KEY, JSON.stringify(S));
+    store="local";
+  }
+}
+function save(){
+  setDot("saving","Saving…");
+  clearTimeout(saveT);
+  saveT=setTimeout(async ()=>{
+    try{ await doSave(); setDot("ok","Saved"); }
+    catch(e){
+      setTimeout(async ()=>{
+        try{ await doSave(); setDot("ok","Saved"); }
+        catch(e2){ setDot("err", store==="none"?"Not saved — no storage in this view":"Save failed — it will retry on your next edit"); }
+      },900);
+    }
+  },400);
+}
+function setDot(k,t){
+  const d=document.getElementById("save-dot"), x=document.getElementById("save-txt");
+  d.className="dot"+(k==="saving"?" saving":k==="err"?" err":"");
+  x.textContent=t;
+}
+/* ============ helpers ============ */
+const D = s => new Date(s+"T00:00:00");
+const ISO = d => d.toISOString().slice(0,10);
+function todayISO(){
+  const now=new Date();
+  const t=ISO(new Date(now.getFullYear(),now.getMonth(),now.getDate()));
+  if(t < P[0].from) return P[0].from;
+  const last=P[P.length-1].to;
+  return t>last?last:t;
+}
+const fm = (n,dp=0) => (n<0?"−":"")+Math.abs(n).toLocaleString("en-GB",{minimumFractionDigits:dp,maximumFractionDigits:dp});
+function daysBetween(a,b){ return Math.round((D(b)-D(a))/86400000); }
+function phaseOf(t){ return P.find(p=>t>=p.from && t<=p.to) || P[P.length-1]; }
+let selDay=null, editPay=null, editOO=null, openPhases=null;
+function phFirstOfMonth(p){ const d=D(p.from); return ISO(new Date(d.getFullYear(), d.getMonth()+1, 1)); }
+/* dynamic payments incl. trip instalments + custom additions */
+function allPays(){
+  const list = PAY.slice();
+  if(S.trip.onFlex){
+    const cost = S.trip.actual!=null ? S.trip.actual : S.trip.budget;
+    const inst = Math.ceil(cost/3);
+    list.push({id:"trip-i1",ph:"p2",date:"2026-09-21",label:"Flex — trip 1/3",amt:inst,debt:"flex",trip:true});
+    list.push({id:"trip-i2",ph:"p3",date:"2026-10-21",label:"Flex — trip 2/3",amt:inst,debt:"flex",trip:true});
+    list.push({id:"trip-i3",ph:"p4",date:"2026-11-21",label:"Flex — trip 3/3",amt:cost-2*inst,debt:"flex",trip:true});
+  }
+  for(const c of (S.custom||[])){
+    let i0=P.findIndex(x=>x.id===c.from);
+    let i1=c.once ? i0 : (c.to ? P.findIndex(x=>x.id===c.to) : P.length-1);
+    if(i0<0) continue;
+    if(i1<i0) i1=i0;
+    for(let i=i0;i<=i1;i++){
+      const p=P[i];
+      list.push({id:"cust-"+c.id+"-"+p.id, ph:p.id, date:phFirstOfMonth(p), label:c.label, amt:c.amt, debt:null, custom:c.id});
+    }
+  }
+  return list.sort((a,b)=>a.date<b.date?-1:1);
+}
+function payActual(pm){ const r=S.pays[pm.id]; return r&&r.done ? (r.actual!=null?r.actual:pm.amt) : null; }
+/* envelope maths with cross-phase carry */
+function envMath(){
+  const out={}; let carry=0;
+  for(const p of P){
+    let env = p.envelope;
+    // one-offs live outside the envelope; optional legroom handled separately
+    let spent=0;
+    const days=S.spend[p.id]||{};
+    for(const k in days) spent+=days[k];
+    // payment variance in this phase (paid more/less than planned) folds in, in GBP
+    let variance=0;
+    for(const pm of allPays()){ if(pm.ph===p.id){ const a=payActual(pm); if(a!=null) variance += (a-pm.amt); } }
+    // one-off variance (P1): actuals vs planned
+    let ooVar=0;
+    (p.oneoffs||[]).forEach(o=>{
+      if(o.optional && !S.legroom) return;
+      const rec=S.oneoffs[o.id];
+      if(rec&&rec.done&&rec.actual!=null) ooVar += (rec.actual-o.amt);
+    });
+    const rf = p.cur==="S$"?RATE:1;
+    const varInPhase = variance*rf + ooVar;
+    const effective = env - carry*rf - varInPhase;
+    const remaining = effective - spent;
+    out[p.id]={env, effective, spent, remaining, variance:variance*rf+ooVar, carryIn:carry, rf};
+    carry = remaining<0 ? -remaining/rf : 0; // carry forward in GBP
+  }
+  return out;
+}
+/* runway */
+function debtsRemaining(){
+  const paid={amex:0,flex:0,loan:0,bcard:0,pgl:0};
+  for(const pm of allPays()){ const a=payActual(pm); if(a!=null && pm.debt) paid[pm.debt]+=a; }
+  let amex=START.amex - paid.amex, bcard=START.bcard - paid.bcard, flex=START.flex - paid.flex, loan=START.loan - paid.loan;
+  if(S.trip.onFlex){ flex += (S.trip.actual!=null?S.trip.actual:S.trip.budget); }
+  const od = S.balance.v<0 ? -S.balance.v : 0;
+  const rem = Math.max(0,amex)+Math.max(0,bcard)+Math.max(0,flex)+Math.max(0,loan)+od;
+  const pglStart = (S.pgl&&S.pgl.start!=null)?S.pgl.start:7000;
+  const pglRem = Math.max(0, pglStart - paid.pgl);
+  return {rem, startTotal: START.amex+START.bcard+START.flex+START.loan+START.od + (S.trip.onFlex?(S.trip.actual!=null?S.trip.actual:S.trip.budget):0), pglRem, pglStart};
+}
+/* overdraft projection: from entered balance, walk dated plan flows to next payday */
+function odProjection(){
+  const t=todayISO();
+  const paydays=P.filter(p=>p.payday&&p.payday>t).map(p=>p.payday).sort();
+  const horizon = paydays.length? paydays[0] : P[P.length-1].to;
+  let bal=S.balance.v, low=bal;
+  const em=envMath(); const cp=phaseOf(t);
+  // remaining envelope burn spread daily to horizon (only current phase, GBP)
+  const rate=cp.cur==="S$"?RATE:1;
+  const remEnvGBP=Math.max(0,em[cp.id].remaining)/rate;
+  const dTot=Math.max(1,daysBetween(t,horizon));
+  const daily=remEnvGBP/Math.max(1,daysBetween(t,cp.to)+1);
+  let cur=t;
+  for(let i=1;i<=dTot;i++){
+    const d=ISO(new Date(D(t).getTime()+i*86400000));
+    bal-=daily;
+    for(const pm of allPays()){ if(pm.date===d && payActual(pm)==null && pm.date>t){ bal-=pm.amt; } }
+    for(const p of P){ if(p.payday===d){ const inc=(p.incomeEditable&&S.incomes[p.id]!=null)?S.incomes[p.id]:p.income; bal+=inc; } }
+    if(bal<low) low=bal;
+  }
+  return {low, horizon};
+}
+function phaseLabel(p){ return p.n+" · "+D(p.from).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" – "+D(p.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"}); }
+function renderCustom(){
+  const el=document.getElementById("cust-list"); el.innerHTML="";
+  if(!(S.custom||[]).length){
+    el.innerHTML="<div class='pnote' style='margin:0'>Nothing added yet. Gym, car, therapy, a new subscription — whatever the plan doesn't know about yet goes here.</div>";
+    return;
+  }
+  S.custom.forEach(c=>{
+    const pf=P.find(x=>x.id===c.from), pt=c.to?P.find(x=>x.id===c.to):null;
+    const row=document.createElement("div"); row.className="cust-row";
+    row.innerHTML="<div class='cd'>"+c.label+" · <span class='mono'>£"+fm(c.amt)+(c.once?" once":"/mo")+"</span><small>"+(c.once?"in phase "+(pf?pf.n:"?"):"from phase "+(pf?pf.n:"?")+(pt?" to "+pt.n:" onwards"))+"</small></div><button class='x-btn'>remove</button>";
+    row.querySelector(".x-btn").onclick=()=>{
+      S.custom=S.custom.filter(x=>x.id!==c.id);
+      for(const k in S.pays){ if(k.indexOf("cust-"+c.id+"-")===0) delete S.pays[k]; }
+      save(); render();
+    };
+    el.appendChild(row);
+  });
+}
+function initCustomForm(){
+  const from=document.getElementById("cust-from"), to=document.getElementById("cust-to"), kind=document.getElementById("cust-kind");
+  P.forEach(p=>{
+    const o1=document.createElement("option"); o1.value=p.id; o1.textContent=phaseLabel(p); from.appendChild(o1);
+    const o2=document.createElement("option"); o2.value=p.id; o2.textContent=phaseLabel(p); to.appendChild(o2);
+  });
+  from.value=phaseOf(todayISO()).id;
+  kind.onchange=()=>{ to.disabled = kind.value==="once"; };
+  document.getElementById("cust-add").onclick=()=>{
+    const name=(document.getElementById("cust-name").value||"").trim();
+    const amt=parseFloat(document.getElementById("cust-amt").value);
+    if(!name || isNaN(amt) || amt<=0) return;
+    S.custom=S.custom||[];
+    S.custom.push({id:Date.now().toString(36), label:name, amt:amt, from:from.value, to:(kind.value==="once"?null:(to.value||null)), once:kind.value==="once"});
+    document.getElementById("cust-name").value=""; document.getElementById("cust-amt").value="";
+    save(); render();
+  };
+}
+/* ============ render ============ */
+function render(){
+  const t=todayISO(); const cp=phaseOf(t); const em=envMath();
+  /* runway */
+  const dr=debtsRemaining();
+  const ch2 = t>"2027-03-28" || dr.rem<=0.5;
+  const pct = ch2 ? Math.min(100,Math.max(0,100*(1-dr.pglRem/Math.max(1,dr.pglStart))))
+                  : Math.min(100,Math.max(0,100*(1-dr.rem/dr.startTotal)));
+  document.getElementById("rw-fill").style.width=pct.toFixed(1)+"%";
+  document.getElementById("rw-left").innerHTML= ch2
+    ? "£"+fm(dr.pglRem)+"<small>postgrad loan left</small>"
+    : "£"+fm(dr.rem)+"<small>still to clear</small>";
+  const dleft=daysBetween(t,"2027-03-28");
+  document.getElementById("rw-days").innerHTML= ch2
+    ? (dr.pglRem<=0.5 ? "PGL gone — ~£470/mo back in your pay." : "Chapter 2 · the postgrad loan<br>~£470/mo returns when SLC confirms £0")
+    : (dleft>0? "<b class='mono'>"+dleft+"</b> days to the last payment<br>28 Mar 2027" : "Chapter 1 done.");
+  const lights=document.getElementById("rw-lights"); lights.innerHTML="";
+  P.forEach(p=>{ const s=document.createElement("div"); s.className="rl"+(t>p.to?" done":""); lights.appendChild(s); });
+  /* today card */
+  document.getElementById("today-date").textContent=new Date(D(t)).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+  const cur=cp.cur; document.getElementById("allow-cur").textContent=cur;
+  const daysLeftIncl=daysBetween(t,cp.to)+1;
+  const spentToday=(S.spend[cp.id]||{})[t]||0;
+  const allowance=Math.max(0,(em[cp.id].remaining+spentToday))/Math.max(1,daysLeftIncl);
+  document.getElementById("allow-num").textContent=fm(allowance,2);
+  const base=cp.envelope/(daysBetween(cp.from,cp.to)+1);
+  document.getElementById("allow-sub").textContent="today's recalibrated allowance · phase "+cp.n+" ends "+D(cp.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  const why=document.getElementById("why");
+  const diff=allowance-base;
+  if(em[cp.id].remaining<0){
+    why.className="why"; why.textContent="Envelope fully used — £"+fm(Math.abs(em[cp.id].remaining/(cur==="S$"?RATE:1)))+" rolls into next phase. Not a failure: the road just got restructured. Aim for zero-spend days where you can.";
+  } else if(Math.abs(diff)<0.5){ why.className="why neutral"; why.textContent="Bang on plan. Base rate is "+cur+fm(base,0)+"/day."; }
+  else if(diff<0){ why.className="why"; why.textContent="Running "+cur+fm(-diff*daysLeftIncl,0)+" over so far — each remaining day absorbs a little. Base was "+cur+fm(base,0)+"."; }
+  else { why.className="why neutral"; why.style.color="var(--mint)"; why.textContent="Underspent so far — allowance up from "+cur+fm(base,0)+". Banking it beats spending it."; }
+  if(diff>=0.5){why.style.borderColor="rgba(87,217,163,.35)";}else{why.style.color="";}
+  document.getElementById("today-log").textContent="Logged today: "+cur+fm(spentToday,2);
+  /* week line */
+  let wk=0; for(let i=0;i<7;i++){const d=ISO(new Date(D(t).getTime()-i*86400000)); if(d>=cp.from) wk+=((S.spend[cp.id]||{})[d]||0);}
+  document.getElementById("week-line").textContent="Last 7 days: "+cur+fm(wk,0)+" · envelope left: "+cur+fm(Math.max(0,em[cp.id].remaining),0)+" of "+cur+fm(em[cp.id].effective,0);
+  /* day grid */
+  const grid=document.getElementById("daygrid"); grid.innerHTML="";
+  const total=daysBetween(cp.from,cp.to)+1;
+  for(let i=0;i<total;i++){
+    const d=ISO(new Date(D(cp.from).getTime()+i*86400000));
+    const v=(S.spend[cp.id]||{})[d];
+    const el=document.createElement("div");
+    let cls="day";
+    if(d>t) cls+=" future";
+    else if(v!=null) cls+= v<=base+0.001?" under":" over";
+    if(d===t) cls+=" today-d";
+    el.className=cls;
+    el.innerHTML="<div class='d'>"+D(d).getDate()+"</div><div class='v mono'>"+(v!=null?fm(v,0):(d<=t?"·":""))+"</div>";
+    if(d===selDay) el.className+=" sel";
+    if(d<=t){ el.onclick=()=>{ selDay=(selDay===d?null:d); render(); }; }
+    grid.appendChild(el);
+  }
+  if(selDay && (selDay<cp.from || selDay>t)) selDay=null;
+  const de=document.getElementById("day-edit");
+  if(selDay){
+    de.style.display="block";
+    document.getElementById("day-edit-label").textContent="Editing "+D(selDay).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+" ("+cur+")";
+    const di=document.getElementById("day-in");
+    if(document.activeElement!==di) di.value=(S.spend[cp.id]||{})[selDay]!=null?(S.spend[cp.id]||{})[selDay]:"";
+  } else { de.style.display="none"; }
+  /* overdraft */
+  const bi=document.getElementById("bal-in"); if(document.activeElement!==bi) bi.value=S.balance.v;
+  const proj=odProjection();
+  const scale=v=>Math.min(97,Math.max(1,( (v+2000)/(2000+800) )*100)); // -2000..+800
+  const pinN=document.getElementById("od-now"), pinL=document.getElementById("od-low");
+  pinN.style.left=scale(S.balance.v)+"%"; pinN.dataset.l="now £"+fm(S.balance.v);
+  pinL.style.left=scale(proj.low)+"%"; pinL.dataset.l="low £"+fm(proj.low);
+  const note=document.getElementById("od-note");
+  note.innerHTML="Projected low before the next payday ("+D(proj.horizon).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+"): <b class='mono "+(proj.low<-2000?"breach":"")+"'>£"+fm(proj.low)+"</b> against the −£2,000 limit"+
+    (proj.low<-2000?" — <span class='breach'>this breaches. Move a chunk of that stretch onto Flex (0%) before it happens — the limit won't move.</span>":" — headroom £"+fm(Math.max(0,proj.low+2000))+". "+(proj.low>-1700?"Comfortable.":"Tight but survivable — keep logging."));
+  /* current phase card */
+  renderPhaseInto(cp, document.getElementById("phase-envs"), document.getElementById("phase-pays"), document.getElementById("phase-spare"), em, t, true);
+  document.getElementById("phase-title").innerHTML="Phase "+cp.n+" — "+cp.title+" <span class='tag'>"+D(cp.from).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" – "+D(cp.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+"</span>";
+  /* trip */
+  document.getElementById("trip-flex").checked=S.trip.onFlex;
+  const tc=S.trip.actual!=null?S.trip.actual:0;
+  document.getElementById("trip-spent-show").textContent=S.trip.actual!=null?"£"+fm(S.trip.actual)+" actual":"not logged yet";
+  const tb=document.getElementById("trip-bar"); const tpct=Math.min(100,(tc/S.trip.budget)*100);
+  tb.style.width=(S.trip.actual!=null?Math.max(4,tpct):0)+"%"; tb.className=tc>S.trip.budget?"hot":"cool";
+  /* custom additions */
+  renderCustom();
+  /* phases list */
+  const ph=document.getElementById("phases"); ph.innerHTML="";
+  if(openPhases===null) openPhases=new Set([cp.id]);
+  P.forEach(p=>{
+    const box=document.createElement("div");
+    box.className="phase"+(openPhases.has(p.id)?" open":"")+(p.id===cp.id?" now":"")+(t>p.to?" past":"");
+    const st= t>p.to?"done": p.id===cp.id?"now":"ahead";
+    box.innerHTML="<div class='phase-head'><span class='num'>"+p.n+"</span><div class='t'>"+p.title+"<small>"+D(p.from).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" – "+D(p.to).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+(p.income?" · in £"+fm((p.incomeEditable&&S.incomes[p.id]!=null)?S.incomes[p.id]:p.income):"")+"</small></div><span class='st'>"+st+"</span></div><div class='phase-body'></div>";
+    const body=box.querySelector(".phase-body");
+    const e1=document.createElement("div"), e2=document.createElement("div"), e3=document.createElement("div");
+    body.appendChild(e1); body.appendChild(e2); body.appendChild(e3);
+    renderPhaseInto(p,e1,e2,e3,em,t,false);
+    if(p.incomeEditable){
+      const w=document.createElement("div"); w.className="actual-edit";
+      w.innerHTML="<input type='number' inputmode='decimal' placeholder='Actual pay on 25 Sep' value='"+(S.incomes[p.id]!=null?S.incomes[p.id]:"")+"'><button class='small ghost'>Set pay</button>";
+      w.querySelector("button").onclick=()=>{const v=parseFloat(w.querySelector("input").value); if(!isNaN(v)){S.incomes[p.id]=v; save(); render();}};
+      body.appendChild(w);
+    }
+    if(p.pglEdit){
+      const w=document.createElement("div"); w.className="actual-edit";
+      w.innerHTML="<input type='number' inputmode='decimal' placeholder='PGL balance (SLC)' value='"+((S.pgl&&S.pgl.start!=null)?S.pgl.start:"")+"'><button class='small ghost'>Set PGL</button>";
+      w.querySelector("button").onclick=()=>{const v=parseFloat(w.querySelector("input").value); if(!isNaN(v)&&v>=0){S.pgl={start:v}; save(); render();}};
+      body.appendChild(w);
+    }
+    if(p.note){const n=document.createElement("div"); n.className="pnote"; n.textContent=p.note; body.appendChild(n);}
+    box.querySelector(".phase-head").onclick=()=>{ if(openPhases.has(p.id)) openPhases.delete(p.id); else openPhases.add(p.id); box.classList.toggle("open"); };
+    ph.appendChild(box);
+  });
+}
+function mkEditor(val, onSave, onClose){
+  const w=document.createElement("div"); w.className="actual-edit";
+  w.innerHTML="<input type='number' inputmode='decimal' step='0.01' value='"+(val!=null?val:"")+"'><button class='small'>Save</button><button class='small ghost'>✕</button>";
+  const bs=w.querySelectorAll("button");
+  bs[0].onclick=()=>{const n=parseFloat(w.querySelector("input").value); if(!isNaN(n)) onSave(n);};
+  bs[1].onclick=onClose;
+  return w;
+}
+function renderPhaseInto(p, envEl, payEl, spareEl, em, t, isCurrent){
+  const cur=p.cur, m=em[p.id];
+  envEl.innerHTML="";
+  const env=document.createElement("div"); env.className="env";
+  const pct=Math.min(100,(m.spent/Math.max(1,m.effective))*100);
+  env.innerHTML="<div class='env-top'><span>Everyday envelope — groceries, food, life</span><span class='mono'>"+cur+fm(m.spent,0)+" / "+cur+fm(m.effective,0)+(m.effective!==m.env?" <span style='color:var(--faint)'>(was "+fm(m.env,0)+")</span>":"")+"</span></div><div class='bar'><i class='"+(pct>100?"hot":pct>85?"":"cool")+"' style='width:"+Math.min(100,Math.max(2,pct))+"%'></i></div>";
+  envEl.appendChild(env);
+  /* one-offs for P1 */
+  (p.oneoffs||[]).forEach(o=>{
+    if(o.optional){
+      const row=document.createElement("div"); row.className="toggle-row";
+      row.innerHTML="<div style='flex:1;font-size:14px'>"+o.label+" · "+cur+o.amt+"</div><label class='switch'><input type='checkbox' "+(S.legroom?"checked":"")+"><span class='slider'></span></label>";
+      row.querySelector("input").onchange=e=>{S.legroom=e.target.checked; save(); render();};
+      envEl.appendChild(row); return;
+    }
+    const rec=S.oneoffs[o.id]||{};
+    const shown=rec.done&&rec.actual!=null?rec.actual:o.amt;
+    const row=document.createElement("div"); row.className="pay";
+    row.innerHTML="<button class='tick "+(rec.done?"done":"")+"'>"+(rec.done?"✓":"")+"</button><div class='info'><div class='name "+(rec.done?"done-txt":"")+"'>"+o.label+"</div>"+(rec.done?"<div class='due'>done — tap amount to adjust</div>":"")+"</div><div class='amt mono"+(rec.done?" editable":"")+"'>"+cur+fm(shown)+(rec.done&&rec.actual!=null&&rec.actual!==o.amt?"<span class='delta "+(rec.actual>o.amt?"over":"under")+"'>"+(rec.actual>o.amt?"+":"−")+fm(Math.abs(rec.actual-o.amt))+" vs plan</span>":"")+"</div>";
+    row.querySelector(".tick").onclick=()=>{ S.oneoffs[o.id]=rec.done?{done:false,actual:null}:{done:true,actual:null}; if(editOO===o.id)editOO=null; save(); render(); };
+    if(rec.done){ row.querySelector(".amt").onclick=()=>{ editOO=(editOO===o.id?null:o.id); render(); }; }
+    envEl.appendChild(row);
+    if(editOO===o.id && rec.done){
+      envEl.appendChild(mkEditor(rec.actual!=null?rec.actual:o.amt,
+        n=>{S.oneoffs[o.id]={done:true,actual:n}; editOO=null; save(); render();},
+        ()=>{editOO=null; render();}));
+    }
+  });
+  /* payments */
+  payEl.innerHTML="";
+  const pays=allPays().filter(x=>x.ph===p.id);
+  pays.forEach(pm=>{
+    const rec=S.pays[pm.id]||{};
+    const overdue=!rec.done && t>pm.date;
+    const shown=rec.done&&rec.actual!=null?rec.actual:pm.amt;
+    const row=document.createElement("div"); row.className="pay";
+    row.innerHTML="<button class='tick "+(rec.done?"done":overdue?"late":"")+"'>"+(rec.done?"✓":overdue?"✗":"")+"</button>"+
+      "<div class='info'><div class='name "+(rec.done?"done-txt":"")+"'>"+pm.label+"</div><div class='due "+(overdue?"overdue":"")+"'>"+(pm.custom?"yours · ":"")+(rec.done?"paid — tap amount to adjust":(overdue?"was due ":"due ")+D(pm.date).toLocaleDateString("en-GB",{day:"numeric",month:"short"}))+"</div></div>"+
+      "<div class='amt mono"+(rec.done?" editable":"")+"'>£"+fm(shown)+(rec.done&&rec.actual!=null&&rec.actual!==pm.amt?"<span class='delta "+(rec.actual>pm.amt?"over":"under")+"'>"+(rec.actual>pm.amt?"+":"−")+fm(Math.abs(rec.actual-pm.amt))+" vs plan</span>":"")+"</div>";
+    row.querySelector(".tick").onclick=()=>{ S.pays[pm.id]=rec.done?{done:false,actual:null}:{done:true,actual:null,at:t}; if(editPay===pm.id)editPay=null; save(); render(); };
+    if(rec.done){ row.querySelector(".amt").onclick=()=>{ editPay=(editPay===pm.id?null:pm.id); render(); }; }
+    payEl.appendChild(row);
+    if(editPay===pm.id && rec.done){
+      payEl.appendChild(mkEditor(rec.actual!=null?rec.actual:pm.amt,
+        n=>{S.pays[pm.id]={done:true,actual:n,at:t}; editPay=null; save(); render();},
+        ()=>{editPay=null; render();}));
+    }
+  });
+  /* spare */
+  if(p.income){
+    const inc=(p.incomeEditable&&S.incomes[p.id]!=null)?S.incomes[p.id]:p.income;
+    const fixed=pays.reduce((s,x)=>s+(payActual(x)!=null?payActual(x):x.amt),0);
+    const carryGBP=m.carryIn||0;
+    const spare=inc-fixed-(m.env/m.rf)-carryGBP;
+    spareEl.className="spare"+(spare<0?" neg":"");
+    spareEl.textContent=(spare>=0?"Spare after everything: £"+fm(spare)+" — rebuilds the buffer first.":"Short by £"+fm(-spare)+" this phase — the overdraft or next phase carries it. Planned, not failed.");
+  } else spareEl.textContent="";
+}
+/* ============ events ============ */
+document.getElementById("spend-add").onclick=()=>{
+  const t=todayISO(), cp=phaseOf(t);
+  const v=parseFloat(document.getElementById("spend-in").value);
+  if(isNaN(v)||v<0)return;
+  S.spend[cp.id]=S.spend[cp.id]||{};
+  S.spend[cp.id][t]=((S.spend[cp.id][t])||0)+v;
+  document.getElementById("spend-in").value="";
+  save(); render();
+};
+document.getElementById("bal-save").onclick=()=>{
+  const v=parseFloat(document.getElementById("bal-in").value);
+  if(isNaN(v))return; S.balance={v, at:todayISO()}; save(); render();
+};
+document.getElementById("trip-flex").onchange=e=>{S.trip.onFlex=e.target.checked; save(); render();};
+document.getElementById("trip-save").onclick=()=>{
+  const v=parseFloat(document.getElementById("trip-in").value);
+  if(isNaN(v))return; S.trip.actual=v; document.getElementById("trip-in").value=""; save(); render();
+};
+let resetArm=false, resetT=null;
+document.getElementById("reset").onclick=async ()=>{
+  const b=document.getElementById("reset");
+  if(!resetArm){ resetArm=true; b.textContent="Tap again to wipe everything"; clearTimeout(resetT); resetT=setTimeout(()=>{resetArm=false;b.textContent="Reset everything";},3500); return; }
+  resetArm=false; b.textContent="Reset everything";
+  S={spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:7000}};
+  selDay=null; editPay=null; editOO=null;
+  try{
+    if(store==="claude") await window.storage.delete(KEY, false);
+    else if(store==="local") window.localStorage.removeItem(KEY);
+  }catch(e){}
+  save(); render();
+};
+document.getElementById("day-set").onclick=()=>{
+  if(!selDay)return; const cp=phaseOf(todayISO());
+  const v=parseFloat(document.getElementById("day-in").value);
+  if(isNaN(v)||v<0)return;
+  S.spend[cp.id]=S.spend[cp.id]||{}; S.spend[cp.id][selDay]=v;
+  selDay=null; save(); render();
+};
+document.getElementById("day-clear").onclick=()=>{
+  if(!selDay)return; const cp=phaseOf(todayISO());
+  if(S.spend[cp.id]) delete S.spend[cp.id][selDay];
+  selDay=null; save(); render();
+};
+document.getElementById("day-close").onclick=()=>{ selDay=null; render(); };
+/* ============ init ============ */
+(async ()=>{ await load(); if(!S.custom) S.custom=[]; if(!S.pgl) S.pgl={start:7000}; initCustomForm(); render(); })();
+</script>
+</body>
+</html>
