@@ -444,7 +444,7 @@ const P = [
  {id:"p2", n:"02", title:"The bridge", from:"2026-08-21", to:"2026-09-24", cur:"£", envelope:810, income:4300, payday:"2026-08-21",
   note:"£810 covers the last Singapore week, living 1–13 Sep, and lunches once you start on the 14th. Hair and nails are budgeted on 1 Sep, before you start. This stretch runs closest to the overdraft limit — check the Picture weekly. Running low in the final week is planned, not failure."},
  {id:"p3", n:"03", title:"First Carpmaels pay", from:"2026-09-25", to:"2026-10-24", cur:"£", envelope:830, income:3000, incomeEditable:true, payday:"2026-09-25",
-  note:"October commute, subs and Mounjaro go on the Flex card (0%, three instalments) — that is what keeps the account inside the overdraft this month. Amex stays on the minimum. Council tax, energy and cleaner stay with B until next phase. Set the real pay below when the payslip lands."},
+  note:"About £500 of October living goes on the Flex card (0% over three instalments) — that is what keeps the account inside the overdraft this month. Amex stays on the minimum. Council tax, energy and cleaner stay with B until next phase. Set the real pay below when the payslip lands."},
  {id:"p4", n:"04", title:"Full pay · bills begin", from:"2026-10-25", to:"2026-11-24", cur:"£", envelope:910, income:4900, payday:"2026-10-25",
   note:"You take over council tax, energy and the cleaner, and hair + beauty starts. Barclaycard stays on the 1% minimum — every spare pound goes at the Amex while it is the only thing charging interest."},
  {id:"p5", n:"05", title:"Steady state", from:"2026-11-25", to:"2026-12-24", cur:"£", envelope:910, income:4900, payday:"2026-11-25",
@@ -612,9 +612,9 @@ const KEY="k-rtz-v1";
 let S = {
   spend:{}, pays:{}, oneoffs:{}, trip:{onFlex:true, budget:500, actual:null},
   legroom:false, balance:{v:-920.10, at:"2026-07-21"}, incomes:{}, custom:[],
-  pgl:{start:10091.50, at:"2026-07-20", rate:7.3, dedCC:270, dedSep:280, dedNew:470},
-  plan2:{v:139940.18, at:"2026-07-20"},
-  acct:{}, amounts:{}, env:{}, rate:1.70, b30:{on:true, amt:500, onFlex:true}, flexOct:{on:true, amt:741}, flexAug:{on:true, amt:450}, flexSep:{on:true, amt:700}, rates:{od:29.0, amex:2.15}, flexDay:21, amexFee:650
+  pgl:{start:10091.50, at:"2026-07-20", rate:6.0, dedCC:200, dedSep:221, dedNew:470},
+  plan2:{v:139940.18, at:"2026-07-20", rate:6.0, dedCC:237, dedSep:268, dedNew:642},
+  acct:{}, amounts:{}, env:{}, rate:1.70, b30:{on:true, amt:500, onFlex:true}, flexOct:{on:true, amt:500}, flexAug:{on:true, amt:450}, flexSep:{on:true, amt:700}, rates:{od:29.0, amex:2.15}, flexDay:21, flexLimit:2500, amexLimit:12400, amexFee:650
 };
 let store=(()=>{
   try{ if(window.storage) return "claude"; }catch(e){}
@@ -695,7 +695,7 @@ function flexBuys(){
   if(S.trip.onFlex) o.push({date:"2026-07-27", amt:tripCost(), label:"trip"});
   if(S.flexAug&&S.flexAug.on!==false) o.push({date:"2026-08-10", amt:(S.flexAug.amt!=null?S.flexAug.amt:450), label:"Aug living", living:true});
   if(S.flexSep&&S.flexSep.on!==false) o.push({date:"2026-09-18", amt:(S.flexSep.amt!=null?S.flexSep.amt:700), label:"Sep living", living:true});
-  if(S.flexOct&&S.flexOct.on!==false) o.push({date:"2026-10-01", amt:(S.flexOct.amt!=null?S.flexOct.amt:741), label:"Oct living", living:true});
+  if(S.flexOct&&S.flexOct.on!==false) o.push({date:"2026-10-01", amt:(S.flexOct.amt!=null?S.flexOct.amt:500), label:"Oct living", living:true});
   if(S.b30&&S.b30.on!==false&&S.b30.onFlex!==false) o.push({date:"2026-10-09", amt:(S.b30.amt!=null?S.b30.amt:500), label:"B's 30th"});
   return o.filter(x=>x.amt>0);
 }
@@ -829,7 +829,7 @@ function debtsRemaining(){
   const rem = Math.max(0,amex)+Math.max(0,bcard)+Math.max(0,flex)+Math.max(0,loan)+od;
   const pglStart=(S.pgl&&S.pgl.start!=null)?S.pgl.start:7000;
   const pglRem=Math.max(0,pglStart-paid.pgl);
-  return {rem, startTotal: START.amex+START.bcard+START.flex+START.loan+START.od + flexBuys().reduce((s,b)=>s+b.amt,0), pglRem, pglStart, paid};
+  return {rem, startTotal: START.amex+START.bcard+START.flex+START.loan+START.od, pglRem, pglStart, paid};
 }
 /* ============ forecast simulator ============ */
 function simulate(){
@@ -854,11 +854,19 @@ function simulate(){
   let pgl=pglCfg.start!=null?pglCfg.start:10091.50;
   const pglRate=(pglCfg.rate!=null?pglCfg.rate:7.3)/100;
   const dedFor=phId=>{
-    if(phId==="p2") return pglCfg.dedCC!=null?pglCfg.dedCC:270;
-    if(phId==="p3") return pglCfg.dedSep!=null?pglCfg.dedSep:280;
-    return pglCfg.dedNew!=null?pglCfg.dedNew:470;
+    if(phId==="p2") return pglCfg.dedCC!=null?pglCfg.dedCC:200;      // CC, £61,000
+    if(phId==="p3") return pglCfg.dedSep!=null?pglCfg.dedSep:221;    // part-month 14-30 Sep
+    return pglCfg.dedNew!=null?pglCfg.dedNew:470;                    // Carpmaels, £115,000
   };
-  let bank=null, saved=0;
+  const p2cfg=S.plan2||{};
+  let p2bal=p2cfg.v!=null?p2cfg.v:139940.18;
+  const p2Rate=(p2cfg.rate!=null?p2cfg.rate:6.0)/100;
+  const p2DedFor=phId=>{
+    if(phId==="p2") return p2cfg.dedCC!=null?p2cfg.dedCC:237;
+    if(phId==="p3") return p2cfg.dedSep!=null?p2cfg.dedSep:268;
+    return p2cfg.dedNew!=null?p2cfg.dedNew:642;
+  };
+  let bank=null, saved=0, flexPaid=0;
   const odEAR=(S.rates&&S.rates.od!=null?S.rates.od:29.0)/100;
   const odDaily=Math.pow(1+odEAR,1/365)-1;
   const amexMo=(S.rates&&S.rates.amex!=null?S.rates.amex:2.15)/100;
@@ -870,6 +878,7 @@ function simulate(){
     for(const k in bal){ if(A[k]&&A[k].at===d && A[k].v!=null) bal[k]=A[k].v; }
     if(A.pgl&&A.pgl.at===d&&A.pgl.v!=null) pgl=A.pgl.v;
     if(d.slice(8)==="01" && pgl>0) pgl+=pgl*pglRate/12;
+    if(d.slice(8)==="01" && p2bal>0) p2bal+=p2bal*p2Rate/12;
     if(d.slice(8)==="25" && bal.amex>0.5) bal.amex+=bal.amex*amexMo;
     const p=phaseOf(d);
     const rf=p.cur==="S$"?rateFx():1;
@@ -877,6 +886,7 @@ function simulate(){
       if(ph.payday===d){
         if(bank!=null) bank+=incomeOf(ph);
         if(pgl>0) pgl=Math.max(0, pgl-Math.min(pgl, dedFor(ph.id)));
+        if(p2bal>0) p2bal=Math.max(0, p2bal-Math.min(p2bal, p2DedFor(ph.id)));
       }
     }
     // payments
@@ -885,6 +895,7 @@ function simulate(){
       if(f.pm.debt && bal[f.pm.debt]!=null) bal[f.pm.debt]=Math.max(0,bal[f.pm.debt]-f.amt);
       if(f.pm.debt==="pgl") pgl=Math.max(0,pgl-f.amt);
       if(f.pm.id.indexOf("buf-")===0||f.pm.id.indexOf("isa-")===0||f.pm.id.indexOf("fund-")===0) saved+=f.amt;
+      if(f.pm.debt==="flex") flexPaid+=f.amt;
       if(bank!=null) bank-=f.amt;
     }
     // envelope burn (bank only)
@@ -917,7 +928,7 @@ function simulate(){
       if(bank<0) bank-=(-bank)*odDaily;
     }
     const totalDebt=bal.amex+bal.bcard+bal.flex+bal.loan+(bank!=null&&bank<0?-bank:0);
-    series.push({d, bank, totalDebt, saved, pgl, amex:bal.amex, bcard:bal.bcard, flex:bal.flex, loan:bal.loan});
+    series.push({d, bank, totalDebt, saved, pgl, p2:p2bal, flexPaid, amex:bal.amex, bcard:bal.bcard, flex:bal.flex, loan:bal.loan});
     d=addDays(d,1);
   }
   return {series, today};
@@ -1131,8 +1142,10 @@ function renderPicture(t, dr, sim, at){
     opts=opts||{};
     const r=document.createElement("div"); r.className="acct";
     const pctDone=start>0?Math.min(100,Math.max(0,100*(1-val/start))):0;
+    const bp=(opts.barPct!=null?opts.barPct:pctDone);
+    const bc=opts.barColor||"var(--mint)";
     r.innerHTML="<div class='an'><div class='t'>"+name+"</div><small>"+sub+"</small>"+
-      (opts.nobar?"":"<div class='abar'><i style='width:"+pctDone.toFixed(0)+"%'></i></div>")+"</div>"+
+      (opts.nobar?"":"<div class='abar'><i style='width:"+Math.max(0,Math.min(100,bp)).toFixed(0)+"%;background:"+bc+"'></i></div>")+"</div>"+
       "<div class='av'><div class='n mono editable' style='"+(opts.color?"color:"+opts.color:"")+"'>£"+fm(val)+"</div><small>"+(opts.foot||"of £"+fm(start)+" start")+"</small></div>";
     r.querySelector(".n").onclick=()=>{ editAcct=(editAcct===key?null:key); render(); };
     el.appendChild(r);
@@ -1148,14 +1161,24 @@ function renderPicture(t, dr, sim, at){
     }
   }
   const bankNow = at.bank!=null?at.bank:S.balance.v;
-  row("bank","Monzo current","limit −£2,000 · tap to correct", bankNow, 0, {nobar:true, foot:"modelled today", color:bankNow<0?"var(--coral)":"var(--mint)"});
-  row("amex","Amex","min-paying · ~30% APR on the carry", at.amex, START.amex);
+  row("bank","Monzo current","limit −£2,000", bankNow, 0, {nobar:true, foot:"today", color:bankNow<0?"var(--coral)":"var(--mint)"});
+  const amexLimit=(S.amexLimit!=null?S.amexLimit:12400);
+  const amexFree=Math.max(0,amexLimit-at.amex);
+  const amexPct=100*amexFree/amexLimit;
+  const amexCol = amexPct<20?"var(--coral)" : amexPct<50?"var(--gold)" : "var(--mint)";
+  row("amex","Amex","£"+fm(amexFree)+" of £"+fm(amexLimit)+" still available",
+      at.amex, amexLimit, {barPct:amexPct, barColor:amexCol, foot:"owed now"});
   row("bcard","Barclaycard","old promo dies Mar '27 · £490 tranche 0% to Jul '27", at.bcard, START.bcard);
-  row("flex","Monzo Flex","0% instalments"+(S.trip.onFlex?" · incl trip":""), at.flex, START.flex+(S.trip.onFlex?tripCost():0));
+  const flexLimit=(S.flexLimit!=null?S.flexLimit:2500);
+  const flexFree=Math.max(0,flexLimit-at.flex);
+  const freePct=100*flexFree/flexLimit;
+  const flexCol = freePct<20?"var(--coral)" : freePct<50?"var(--gold)" : "var(--mint)";
+  row("flex","Monzo Flex","£"+fm(flexFree)+" of £"+fm(flexLimit)+" still available",
+      at.flex, flexLimit, {barPct:freePct, barColor:flexCol, foot:"owed now"});
   row("loan","Monzo loan","£700/mo · final 21 Mar", at.loan, START.loan);
-  row("pgl","Postgrad loan","~£"+fm((S.pgl&&S.pgl.dedNew)||470)+"/mo via payroll + "+((S.pgl&&S.pgl.rate)||7.3)+"% interest — both modelled", at.pgl, (S.pgl&&S.pgl.start)||10091.50);
-  const p2=(S.plan2&&S.plan2.v!=null)?S.plan2.v:139940.18;
-  row("plan2","Plan 2 loan","not targeted — behaves like a graduate tax", p2, 0, {nobar:true, foot:"for context only"});
+  row("pgl","Postgrad loan","£470 from October · "+((S.pgl&&S.pgl.rate)||6.0)+"% interest", at.pgl, (S.pgl&&S.pgl.start)||10091.50);
+  const p2now=(at.p2!=null?at.p2:((S.plan2&&S.plan2.v!=null)?S.plan2.v:139940.18));
+  row("plan2","Plan 2 loan","", p2now, 0, {nobar:true, foot:"tracked, not targeted"});
   drawChart("ch-debt", sim, [{key:"totalDebt",color:"#D95C92"},{key:"saved",color:"#0B8F6F"}], {includeY:[0]});
   drawChart("ch-bank", sim, [{key:"bank",color:"#5A7FD8"}], {guides:[{v:-2000,color:"rgba(216,69,61,.65)"},{v:0,color:"rgba(0,0,0,.18)"}], includeY:[-2400,500]});
   /* gauge */
@@ -1373,7 +1396,7 @@ document.getElementById("bk-import").onclick=()=>{
     return;
   }
   bkImportArm=false; btn.textContent="Restored";
-  S=Object.assign({spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:500,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470},plan2:{v:139940.18,at:"2026-07-20"},acct:{},amounts:{},env:{},rate:1.70}, obj);
+  S=Object.assign({spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:500,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:6.0,dedCC:200,dedSep:221,dedNew:470},plan2:{v:139940.18,at:"2026-07-20",rate:6.0,dedCC:237,dedSep:268,dedNew:642},acct:{},amounts:{},env:{},rate:1.70}, obj);
   selDay=null; editPay=null; editOO=null; editAcct=null;
   save(); render();
   setTimeout(()=>{document.getElementById("bk-import").textContent="Restore from the box";},2200);
@@ -1383,7 +1406,7 @@ document.getElementById("reset").onclick=async ()=>{
   const b=document.getElementById("reset");
   if(!resetArm){ resetArm=true; b.textContent="Tap again to wipe everything"; clearTimeout(resetT); resetT=setTimeout(()=>{resetArm=false;b.textContent="Reset everything";},3500); return; }
   resetArm=false; b.textContent="Reset everything";
-  S={spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470},plan2:{v:139940.18,at:"2026-07-20"},acct:{},amounts:{},env:{},rate:1.70,b30:{on:true,amt:500,onFlex:true},flexOct:{on:true,amt:741},flexAug:{on:true,amt:450},flexSep:{on:true,amt:700},rates:{od:29.0,amex:2.15},flexDay:21,amexFee:650};
+  S={spend:{},pays:{},oneoffs:{},trip:{onFlex:true,budget:700,actual:null},legroom:false,balance:{v:-920.10,at:"2026-07-21"},incomes:{},custom:[],pgl:{start:10091.50,at:"2026-07-20",rate:6.0,dedCC:200,dedSep:221,dedNew:470},plan2:{v:139940.18,at:"2026-07-20",rate:6.0,dedCC:237,dedSep:268,dedNew:642},acct:{},amounts:{},env:{},rate:1.70,b30:{on:true,amt:500,onFlex:true},flexOct:{on:true,amt:500},flexAug:{on:true,amt:450},flexSep:{on:true,amt:700},rates:{od:29.0,amex:2.15},flexDay:21,flexLimit:2500,amexLimit:12400,amexFee:650};
   selDay=null; editPay=null; editOO=null;
   try{
     if(store==="claude") await window.storage.delete(KEY, false);
@@ -1442,17 +1465,19 @@ window.addEventListener("resize",()=>{ if(activeTab==="pg-picture") render(); })
 (async ()=>{
   await load();
   if(!S.custom) S.custom=[];
-  if(!S.pgl||S.pgl.start==null||S.pgl.start===7000) S.pgl={start:10091.50,at:"2026-07-20",rate:7.3,dedCC:270,dedSep:280,dedNew:470};
-  if(!S.plan2) S.plan2={v:139940.18,at:"2026-07-20"};
+  if(!S.pgl||S.pgl.start==null||S.pgl.start===7000||S.pgl.rate===7.3) S.pgl={start:10091.50,at:"2026-07-20",rate:6.0,dedCC:200,dedSep:221,dedNew:470};
+  if(!S.plan2||S.plan2.rate==null) S.plan2={v:(S.plan2&&S.plan2.v!=null?S.plan2.v:139940.18),at:"2026-07-20",rate:6.0,dedCC:237,dedSep:268,dedNew:642};
   if(!S.acct) S.acct={};
   if(!S.b30) S.b30={on:true,amt:500,onFlex:true};
   if(S.b30.amt===1000) S.b30.amt=500;
-  if(!S.flexOct) S.flexOct={on:true,amt:741};
+  if(!S.flexOct) S.flexOct={on:true,amt:500};
   if(!S.flexAug) S.flexAug={on:true,amt:450};
   if(!S.flexSep) S.flexSep={on:true,amt:700};
   if(!S.rates) S.rates={od:29.0,amex:2.15};
   if(S.flexDay==null) S.flexDay=21;
   if(S.amexFee==null) S.amexFee=650;
+  if(S.flexLimit==null) S.flexLimit=2500;
+  if(S.amexLimit==null) S.amexLimit=12400;
   if(S.trip && S.trip.budget===700) S.trip.budget=500;
   if(!S.amounts) S.amounts={};
   if(!S.env) S.env={};
